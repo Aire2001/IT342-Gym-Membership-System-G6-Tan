@@ -10,6 +10,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import edu.cit.tan.GymMembershipPaymentSystem.service.CustomOAuth2UserService;
 
 @Configuration
 @EnableWebSecurity
@@ -17,6 +18,9 @@ public class SecurityConfig {
 
     @Autowired
     private CustomUserDetailsService userDetailsService;
+
+    @Autowired
+    private CustomOAuth2UserService customOAuth2UserService;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -36,6 +40,15 @@ public class SecurityConfig {
                         // All other endpoints require authentication
                         .anyRequest().authenticated()
                 )
+<<<<<<< HEAD
+=======
+                .oauth2Login(oauth2 -> oauth2
+                        // Handle the logic of what to do with the Google user after successful login
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(customOAuth2UserService)
+                        )
+                )
+>>>>>>> 786762c6e (Final clean structure (backend, web, mobile, docs))
                 .headers(headers -> headers.frameOptions(frame -> frame.disable()));
 
         return http.build();

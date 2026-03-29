@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Simple dumbbell / gym icon in white -->
+    <!-- Left weight plate -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M18,42 L18,66 L26,66 L26,42 Z"/>
+    <!-- Left bar connector -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M26,50 L82,50 L82,58 L26,58 Z"/>
+    <!-- Right weight plate -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M82,42 L82,66 L90,66 L90,42 Z"/>
+    <!-- Handle grip left -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M34,46 L42,46 L42,62 L34,62 Z"/>
+    <!-- Handle grip right -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M66,46 L74,46 L74,62 L66,62 Z"/>
+</vector>
