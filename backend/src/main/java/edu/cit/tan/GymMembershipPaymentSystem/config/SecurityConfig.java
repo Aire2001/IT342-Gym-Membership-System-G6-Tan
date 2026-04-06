@@ -40,15 +40,12 @@ public class SecurityConfig {
                         // All other endpoints require authentication
                         .anyRequest().authenticated()
                 )
-<<<<<<< HEAD
-=======
                 .oauth2Login(oauth2 -> oauth2
                         // Handle the logic of what to do with the Google user after successful login
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(customOAuth2UserService)
                         )
                 )
->>>>>>> 786762c6e (Final clean structure (backend, web, mobile, docs))
                 .headers(headers -> headers.frameOptions(frame -> frame.disable()));
 
         return http.build();
