@@ -49,6 +49,52 @@ public class Payment {
         this.paymentDate = LocalDateTime.now();
     }
 
+    // Builder Pattern
+    public static class Builder {
+        private User user;
+        private Membership membership;
+        private BigDecimal amount;
+        private String paymentReference;
+        private String paymentMethod;
+        private String paymentStatus;
+
+        public Builder user(User user) {
+            this.user = user;
+            return this;
+        }
+
+        public Builder membership(Membership membership) {
+            this.membership = membership;
+            return this;
+        }
+
+        public Builder amount(BigDecimal amount) {
+            this.amount = amount;
+            return this;
+        }
+
+        public Builder paymentReference(String paymentReference) {
+            this.paymentReference = paymentReference;
+            return this;
+        }
+
+        public Builder paymentMethod(String paymentMethod) {
+            this.paymentMethod = paymentMethod;
+            return this;
+        }
+
+        public Builder paymentStatus(String paymentStatus) {
+            this.paymentStatus = paymentStatus;
+            return this;
+        }
+
+        public Payment build() {
+            Payment payment = new Payment(user, membership, amount, paymentReference, paymentMethod, paymentStatus);
+            payment.setPaymentDate(LocalDateTime.now());
+            return payment;
+        }
+    }
+
     // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }

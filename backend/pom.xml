@@ -51,7 +51,6 @@
 			<artifactId>spring-boot-starter-validation</artifactId>
 		</dependency>
 
-<<<<<<< HEAD
 		<!-- MySQL Driver for XAMPP -->
 		<dependency>
 			<groupId>com.mysql</groupId>
@@ -68,17 +67,12 @@
 		</dependency>
 		-->
 
-		<!-- PostgreSQL Driver for Supabase (Commented out) -->
-		<!--
-=======
 		<!-- PostgreSQL Driver -->
->>>>>>> 786762c6e (Final clean structure (backend, web, mobile, docs))
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 			<scope>runtime</scope>
 		</dependency>
-		-->
 
 		<!-- Lombok -->
 		<dependency>
