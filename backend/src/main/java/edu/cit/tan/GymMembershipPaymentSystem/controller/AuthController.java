@@ -1,23 +1,35 @@
 package edu.cit.tan.GymMembershipPaymentSystem.controller;
 
+import edu.cit.tan.GymMembershipPaymentSystem.entity.UserMembership;
+import edu.cit.tan.GymMembershipPaymentSystem.repository.UserMembershipRepository;
 import edu.cit.tan.GymMembershipPaymentSystem.dto.LoginRequest;
 import edu.cit.tan.GymMembershipPaymentSystem.dto.RegisterRequest;
 import edu.cit.tan.GymMembershipPaymentSystem.dto.ApiResponse;
 import edu.cit.tan.GymMembershipPaymentSystem.dto.AuthResponse;
 import edu.cit.tan.GymMembershipPaymentSystem.service.AuthService;
-import jakarta.validation.Valid;
+import edu.cit.tan.GymMembershipPaymentSystem.entity.User;
+import edu.cit.tan.GymMembershipPaymentSystem.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import jakarta.validation.Valid;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/auth")
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:5174", "http://localhost:5175"})
 public class AuthController {
 
     @Autowired
     private AuthService authService;
+
+    @Autowired
+    private UserMembershipRepository userMembershipRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<?>> register(@Valid @RequestBody RegisterRequest request) {
@@ -133,6 +145,60 @@ public class AuthController {
                     .body(ApiResponse.error(
                             "SYSTEM-001",
                             "Token refresh failed: " + e.getMessage(),
+                            null
+                    ));
+        }
+    }
+
+    @GetMapping("/membership")
+    public ResponseEntity<ApiResponse<?>> getUserMembership() {
+        try {
+            // Get current authenticated user
+            UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            String email = userDetails.getUsername();
+
+            User user = userRepository.findByEmail(email).orElse(null);
+            if (user == null) {
+                return ResponseEntity.status(404)
+                        .body(ApiResponse.error(
+                                "USER-001",
+                                "User not found",
+                                null
+                        ));
+            }
+
+            // Get active membership
+            UserMembership activeMembership = userMembershipRepository.findByUserAndStatus(user, "Active").orElse(null);
+
+            if (activeMembership == null) {
+                return ResponseEntity.ok(ApiResponse.success(Map.of(
+                    "hasMembership", false,
+                    "message", "No active membership found"
+                )));
+            }
+
+            // Return membership details
+            Map<String, Object> membershipData = Map.of(
+                "hasMembership", true,
+                "membershipId", activeMembership.getId(),
+                "membership", Map.of(
+                    "id", activeMembership.getMembership().getId(),
+                    "name", activeMembership.getMembership().getName(),
+                    "duration_months", activeMembership.getMembership().getDurationMonths(),
+                    "price", activeMembership.getMembership().getPrice(),
+                    "description", activeMembership.getMembership().getDescription()
+                ),
+                "start_date", activeMembership.getStartDate().toString(),
+                "end_date", activeMembership.getEndDate().toString(),
+                "status", activeMembership.getStatus()
+            );
+
+            return ResponseEntity.ok(ApiResponse.success(membershipData));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error(
+                            "SYSTEM-001",
+                            "Failed to get membership: " + e.getMessage(),
                             null
                     ));
         }

@@ -1,0 +1,23 @@
+# Frontend dependencies
+fronted\ web/node_modules/
+fronted\ web/dist/
+fronted\ web/.vite
+
+# Backend
+backend/target/
+backend/.mvn/wrapper/maven-wrapper.jar
+
+# IDEs
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Misc
+.env
+.env.local
