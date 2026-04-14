@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
 import { User, Membership, UserMembership, Payment } from '../types';
-import { apiClient, handleApiError } from '../services/api';
+import { apiClient, handleApiError, normalizeStatus } from '../services/api';
 import { toast } from 'sonner';
 
 interface AuthContextType {
@@ -243,7 +243,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           amount: p.amount,
           payment_reference: p.paymentReference,
           payment_method: p.paymentMethod,
-          payment_status: p.paymentStatus,
+          payment_status: normalizeStatus(p.paymentStatus),
           payment_date: p.paymentDate,
           membership: p.membership ? {
             id: p.membership.id,

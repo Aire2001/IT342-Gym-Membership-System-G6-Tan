@@ -1,7 +1,24 @@
 // services/api.ts
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api/v1';
 
-// ================ Request/Response Interfaces ================
+// ================ Helper Functions ================
+
+export const normalizeStatus = (status: string): string => {
+  if (!status) return '';
+  const normalized = status?.toString().trim().toLowerCase();
+  switch (normalized) {
+    case 'pending':
+      return 'Pending';
+    case 'completed':
+      return 'Completed';
+    case 'failed':
+      return 'Failed';
+    default:
+      return status;
+  }
+};
+
+// ================ Request/Response Interfaces ================"
 
 export interface RegisterRequest {
   email: string;
@@ -389,6 +406,14 @@ class ApiClient {
     console.log('🔍 Fetching payment:', id);
     return this.request<PaymentResponse>(`/payments/${id}`, {
       method: 'GET',
+    });
+  }
+
+  async updatePaymentStatus(paymentId: number, status: string): Promise<PaymentResponse> {
+    console.log('🔄 Updating payment status:', { paymentId, status });
+    return this.request<PaymentResponse>(`/payments/${paymentId}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ status: status.toUpperCase() }),
     });
   }
 

@@ -28,9 +28,12 @@ import {
   DialogTitle,
 } from './ui/dialog';
 import { useAuth } from '../context/AuthContext';
-import { apiClient, handleApiError } from '../services/api';
+import { apiClient, handleApiError, normalizeStatus } from '../services/api';
 import { toast } from 'sonner';
 import { Payment } from '../types';
+import {
+  DialogFooter,
+} from './ui/dialog';
 
 export function PaymentHistory() {
   const { user, payments: contextPayments, refreshUserData } = useAuth();
@@ -58,6 +61,13 @@ export function PaymentHistory() {
   // Receipt dialog state
   const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
   const [isReceiptDialogOpen, setIsReceiptDialogOpen] = useState(false);
+
+  // Status update dialog state
+  const [paymentToUpdate, setPaymentToUpdate] = useState<Payment | null>(null);
+  const [newStatus, setNewStatus] = useState<string>('');
+  const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const [isAdmin] = useState(user?.role === 'ADMIN');
 
   useEffect(() => {
     if (!user) {
@@ -170,6 +180,70 @@ export function PaymentHistory() {
     setIsReceiptDialogOpen(true);
   };
 
+  const normalizeStatusLabel = (status: string) => {
+    switch (status?.toString().trim().toLowerCase()) {
+      case 'pending':
+        return 'Pending';
+      case 'completed':
+        return 'Completed';
+      case 'failed':
+        return 'Failed';
+      default:
+        return status;
+    }
+  };
+
+  const handleOpenStatusDialog = (payment: Payment) => {
+    if (!isAdmin) {
+      toast.error('Only admins can update payment status.');
+      return;
+    }
+
+    setPaymentToUpdate(payment);
+    setNewStatus(normalizeStatusLabel(payment.payment_status));
+    setIsStatusDialogOpen(true);
+  };
+
+  const handleUpdatePaymentStatus = async () => {
+    if (!isAdmin) {
+      toast.error('Only admins can update payment status.');
+      setIsStatusDialogOpen(false);
+      return;
+    }
+    if (!paymentToUpdate || !newStatus) {
+      toast.error('Invalid payment or status');
+      return;
+    }
+
+    if (newStatus === paymentToUpdate.payment_status) {
+      toast.info('Status is already ' + newStatus);
+      setIsStatusDialogOpen(false);
+      return;
+    }
+
+    setIsUpdatingStatus(true);
+    try {
+      const response = await apiClient.updatePaymentStatus(paymentToUpdate.id, newStatus);
+      if (response.success && response.data) {
+        // Update the payment in the list
+        setPayments(payments.map(p => 
+          p.id === paymentToUpdate.id ? (response.data as Payment) : p
+        ));
+        // Refresh context data to ensure consistency
+        await refreshUserData(user);
+        toast.success(`Payment status updated to ${newStatus}`);
+        setIsStatusDialogOpen(false);
+      } else {
+        toast.error(response.error?.message || 'Failed to update payment status');
+      }
+    } catch (error) {
+      const errorMessage = handleApiError(error);
+      toast.error(errorMessage);
+    } finally {
+      setIsUpdatingStatus(false);
+    }
+  };
+
   const generateReceiptContent = (payment: Payment): string => {
     return `
 ╔════════════════════════════════════════════════════════════╗
@@ -208,7 +282,8 @@ export function PaymentHistory() {
   };
 
   const getStatusIcon = (status: string) => {
-    switch (status) {
+    const normalized = normalizeStatusLabel(status);
+    switch (normalized) {
       case 'Completed':
         return <CheckCircle className="w-4 h-4 text-green-600" />;
       case 'Failed':
@@ -221,7 +296,8 @@ export function PaymentHistory() {
   };
 
   const getStatusVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
-    switch (status) {
+    const normalized = normalizeStatusLabel(status);
+    switch (normalized) {
       case 'Completed':
         return 'default';
       case 'Failed':
@@ -255,9 +331,9 @@ export function PaymentHistory() {
 
   const getPaymentSummary = () => {
     const total = payments.reduce((sum, p) => sum + p.amount, 0);
-    const completed = payments.filter(p => p.payment_status === 'Completed').length;
-    const pending = payments.filter(p => p.payment_status === 'Pending').length;
-    const failed = payments.filter(p => p.payment_status === 'Failed').length;
+    const completed = payments.filter(p => p.payment_status.toLowerCase() === 'completed').length;
+    const pending = payments.filter(p => p.payment_status.toLowerCase() === 'pending').length;
+    const failed = payments.filter(p => p.payment_status.toLowerCase() === 'failed').length;
 
     return { total, completed, pending, failed };
   };
@@ -490,6 +566,17 @@ export function PaymentHistory() {
                                   >
                                     <Download className="w-4 h-4" />
                                   </Button>
+                                  {isAdmin && (
+                                      <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={() => handleOpenStatusDialog(payment)}
+                                          title="Update Status"
+                                          className="text-xs"
+                                      >
+                                        Edit
+                                      </Button>
+                                  )}
                                 </div>
                               </TableCell>
                             </TableRow>
@@ -679,6 +766,52 @@ export function PaymentHistory() {
                       Download Receipt
                     </Button>
                   </div>
+                </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Status Update Dialog */}
+        <Dialog open={isStatusDialogOpen} onOpenChange={setIsStatusDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Update Payment Status</DialogTitle>
+              <DialogDescription>
+                Change the status for payment reference: {paymentToUpdate?.payment_reference}
+              </DialogDescription>
+            </DialogHeader>
+
+            {paymentToUpdate && (
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="status-select">New Status</Label>
+                    <Select value={newStatus} onValueChange={setNewStatus}>
+                      <SelectTrigger id="status-select">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Pending">Pending</SelectItem>
+                        <SelectItem value="Completed">Completed</SelectItem>
+                        <SelectItem value="Failed">Failed</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <DialogFooter>
+                    <Button
+                        variant="outline"
+                        onClick={() => setIsStatusDialogOpen(false)}
+                        disabled={isUpdatingStatus}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                        onClick={handleUpdatePaymentStatus}
+                        disabled={isUpdatingStatus}
+                    >
+                      {isUpdatingStatus ? 'Updating...' : 'Update Status'}
+                    </Button>
+                  </DialogFooter>
                 </div>
             )}
           </DialogContent>

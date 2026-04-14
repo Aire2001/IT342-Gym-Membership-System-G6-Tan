@@ -241,9 +241,11 @@ export function AdminDashboard() {
           fetchDashboardData();
         }
       } else if (selectedItem.type === 'user') {
-        // Add delete user API call here
-        toast.success('User deleted successfully');
-        fetchDashboardData();
+        const response = await apiClient.deleteUser(selectedItem.id);
+        if (response.success) {
+          toast.success('User deleted successfully');
+          fetchDashboardData();
+        }
       }
       setIsDeleteDialogOpen(false);
     } catch (error) {
@@ -305,8 +307,12 @@ export function AdminDashboard() {
 
   const handleSaveUser = async () => {
     try {
-      // Add update user API call here
-      toast.success('User updated successfully');
+      if (selectedItem && dialogMode === 'edit') {
+        const response = await apiClient.updateUserRole(selectedItem.id, userForm.role);
+        if (response.success) {
+          toast.success('User role updated successfully');
+        }
+      }
       setIsUserDialogOpen(false);
       fetchDashboardData();
     } catch (error) {
