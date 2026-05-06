@@ -3,6 +3,8 @@
 .vscode/
 .metals/
 *.iml
+*.iws
+*.ipr
 
 # Logs
 *.log
@@ -14,10 +16,18 @@ Frontend/node_modules/
 Frontend/dist/
 Frontend/.env
 Frontend/.env.local
+fronted\ web/node_modules/
+fronted\ web/dist/
+fronted\ web/.vite
 
 # Java / Maven
 backend/target/
+backend/.mvn/wrapper/maven-wrapper.jar
 
 # OS
 .DS_Store
 Thumbs.db
+
+# Misc
+.env
+.env.local
