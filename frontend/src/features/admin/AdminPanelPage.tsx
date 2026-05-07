@@ -235,7 +235,7 @@ const AdminPanel = () => {
                       {editingRole?.id === u.id ? (
                         <div className="flex items-center gap-2">
                           <select
-                            value={editingRole.role}
+                            value={editingRole?.role ?? ''}
                             onChange={e => setEditingRole({ id: u.id, role: e.target.value })}
                             className="text-xs border border-gray-300 rounded-lg px-2 py-1 focus:outline-none focus:border-blue-500"
                           >
@@ -298,7 +298,7 @@ const AdminPanel = () => {
                       {editingStatus?.id === p.paymentId ? (
                         <div className="flex items-center gap-2">
                           <select
-                            value={editingStatus.status}
+                            value={editingStatus?.status ?? ''}
                             onChange={e => setEditingStatus({ id: p.paymentId, status: e.target.value })}
                             className="text-xs border border-gray-300 rounded-lg px-2 py-1 focus:outline-none focus:border-blue-500"
                           >
