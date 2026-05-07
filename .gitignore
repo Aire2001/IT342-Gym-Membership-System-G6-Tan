@@ -16,9 +16,6 @@ Frontend/node_modules/
 Frontend/dist/
 Frontend/.env
 Frontend/.env.local
-fronted\ web/node_modules/
-fronted\ web/dist/
-fronted\ web/.vite
 
 # Java / Maven
 backend/target/
