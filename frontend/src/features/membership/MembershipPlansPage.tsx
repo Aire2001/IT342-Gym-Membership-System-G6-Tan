@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { membershipAPI } from '../services/api';
-import type { MembershipPlan } from '../types';
+import { membershipAPI } from './membershipApi';
+import type { MembershipPlan } from '../../shared/types';
 
 const PLAN_META: Record<string, { border: string; badge: string; btnClass: string; perks: string[] }> = {
   Basic: {

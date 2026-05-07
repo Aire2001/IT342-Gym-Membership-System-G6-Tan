@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { paymentAPI } from '../services/api';
-import type { MembershipPlan, PaymentMethod } from '../types';
+import { paymentAPI } from './paymentApi';
+import type { MembershipPlan, PaymentMethod } from '../../shared/types';
 
 const PAYMENT_METHODS: { id: PaymentMethod; label: string; icon: string }[] = [
   { id: 'GCASH', label: 'GCash', icon: '📱' },

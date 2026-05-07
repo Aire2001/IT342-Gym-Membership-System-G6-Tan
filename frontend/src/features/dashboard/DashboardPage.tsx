@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { dashboardAPI } from '../services/api';
-import { useAuth } from '../context/AuthContext';
-import type { DashboardData } from '../types';
+import { dashboardAPI } from './dashboardApi';
+import { useAuth } from '../auth/AuthContext';
+import type { DashboardData } from '../../shared/types';
 
 const StatusBadge = ({ status }: { status: string }) => {
   const map: Record<string, string> = {

@@ -1,15 +1,15 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from './context/AuthContext';
-import Navbar from './components/Navbar';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Dashboard from './pages/Dashboard';
-import MembershipPlans from './pages/MembershipPlans';
-import PaymentPage from './pages/PaymentPage';
-import PaymentHistory from './pages/PaymentHistory';
-import AdminPanel from './pages/AdminPanel';
-import Profile from './pages/Profile';
+import { AuthProvider, useAuth } from './features/auth/AuthContext';
+import Navbar from './shared/components/Navbar';
+import Login from './features/auth/LoginPage';
+import Register from './features/auth/RegisterPage';
+import Dashboard from './features/dashboard/DashboardPage';
+import MembershipPlans from './features/membership/MembershipPlansPage';
+import PaymentPage from './features/payment/PaymentPage';
+import PaymentHistory from './features/payment/PaymentHistoryPage';
+import AdminPanel from './features/admin/AdminPanelPage';
+import Profile from './features/profile/ProfilePage';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, isLoading } = useAuth();

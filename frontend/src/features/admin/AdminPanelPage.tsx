@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { adminAPI, membershipAPI, membershipAdminAPI } from '../services/api';
-import { useAuth } from '../context/AuthContext';
+import { adminAPI } from './adminApi';
+import { membershipAPI, membershipAdminAPI } from '../membership/membershipApi';
+import { useAuth } from '../auth/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 type Tab = 'users' | 'payments' | 'memberships';
