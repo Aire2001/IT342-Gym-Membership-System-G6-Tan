@@ -1,326 +1,260 @@
 package com.example.gymmembershipapp.ui.screens
 
-import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.gymmembershipapp.data.DashboardData
 import com.example.gymmembershipapp.viewmodel.AuthViewModel
+import com.example.gymmembershipapp.viewmodel.DataState
+import com.example.gymmembershipapp.viewmodel.MembershipViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(
     authViewModel: AuthViewModel,
-    onLogout: () -> Unit,
-    onNavigateToDatabase: () -> Unit
+    membershipViewModel: MembershipViewModel,
+    onNavigateToPlans: () -> Unit
 ) {
     val userInfo by authViewModel.userInfo.collectAsState()
-    val displayName = if (!userInfo?.firstName.isNullOrBlank()) {
-        "${userInfo?.firstName} ${userInfo?.lastName}".trim()
-    } else "Member"
+    val dashboardState by membershipViewModel.dashboard.collectAsState()
+    val displayName = if (!userInfo?.firstName.isNullOrBlank())
+        "${userInfo?.firstName} ${userInfo?.lastName}".trim() else "Member"
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
+    LaunchedEffect(Unit) {
+        membershipViewModel.loadDashboard()
+    }
+
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background),
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp)
+    ) {
+        // Welcome
+        item {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(18.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary)
+            ) {
+                Row(
+                    modifier = Modifier.padding(20.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Surface(
+                        shape = RoundedCornerShape(999.dp),
+                        color = Color.White.copy(alpha = 0.2f),
+                        modifier = Modifier.size(52.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Text(
+                                userInfo?.firstName?.firstOrNull()?.toString() ?: "M",
+                                fontSize = 22.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = Color.White
+                            )
+                        }
+                    }
+                    Spacer(Modifier.width(14.dp))
                     Column {
-                        Text("My Dashboard", fontWeight = FontWeight.Bold, fontSize = 18.sp)
                         Text(
-                            text = userInfo?.email ?: "",
-                            fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
+                            "Welcome back,",
+                            fontSize = 13.sp,
+                            color = Color.White.copy(alpha = 0.8f)
+                        )
+                        Text(
+                            displayName,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = Color.White
                         )
                     }
-                },
-                actions = {
-                    IconButton(onClick = {
-                        authViewModel.logout()
-                        onLogout()
-                    }) {
-                        Icon(Icons.Default.Logout, contentDescription = "Logout")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                    actionIconContentColor = MaterialTheme.colorScheme.onPrimary
-                )
-            )
+                }
+            }
         }
-    ) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
-                            MaterialTheme.colorScheme.background
+
+        // Dashboard data
+        item {
+            when (val state = dashboardState) {
+                is DataState.Loading -> {
+                    Box(Modifier.fillMaxWidth().height(200.dp), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                    }
+                }
+                is DataState.Error -> {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(14.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
+                    ) {
+                        Text(
+                            state.message,
+                            modifier = Modifier.padding(16.dp),
+                            color = MaterialTheme.colorScheme.onErrorContainer
                         )
-                    )
-                ),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            // Greeting
-            item {
-                GreetingCard(name = displayName)
-            }
-
-            // Membership Status
-            item {
-                MembershipCard()
-            }
-
-            // Quick Actions
-            item {
-                Text(
-                    "Quick Actions",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
-                    modifier = Modifier.padding(vertical = 4.dp)
-                )
-            }
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    ActionCard(
-                        icon = Icons.Default.Receipt,
-                        label = "Payment\nHistory",
-                        modifier = Modifier.weight(1f),
-                        onClick = {}
-                    )
-                    ActionCard(
-                        icon = Icons.Default.FitnessCenter,
-                        label = "Book\nClass",
-                        modifier = Modifier.weight(1f),
-                        onClick = {}
-                    )
-                    ActionCard(
-                        icon = Icons.Default.Storage,
-                        label = "Admin\nRecords",
-                        modifier = Modifier.weight(1f),
-                        onClick = onNavigateToDatabase
-                    )
+                    }
                 }
-            }
-
-            // Stats Section
-            item {
-                Text(
-                    "Your Stats",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
-                    modifier = Modifier.padding(vertical = 4.dp)
-                )
-            }
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    StatCard("12", "Classes\nAttended", modifier = Modifier.weight(1f))
-                    StatCard("89", "Days\nActive", modifier = Modifier.weight(1f))
-                    StatCard("3", "Months\nLeft", modifier = Modifier.weight(1f))
+                is DataState.Success -> {
+                    DashboardContent(data = state.data, onNavigateToPlans = onNavigateToPlans)
                 }
+                else -> {}
             }
         }
     }
 }
 
 @Composable
-fun GreetingCard(name: String) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
-    ) {
-        Row(
-            modifier = Modifier.padding(20.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Surface(
-                shape = androidx.compose.foundation.shape.CircleShape,
+fun DashboardContent(data: DashboardData, onNavigateToPlans: () -> Unit) {
+    val membershipStatus = data.membershipStatus ?: "None"
+    val isActive = membershipStatus.equals("Active", ignoreCase = true)
+    val statusColor = when {
+        isActive -> MaterialTheme.colorScheme.tertiary
+        membershipStatus.equals("Pending", ignoreCase = true) -> Color(0xFFD97706)
+        else -> MaterialTheme.colorScheme.error
+    }
+    val statusBg = when {
+        isActive -> MaterialTheme.colorScheme.tertiaryContainer
+        membershipStatus.equals("Pending", ignoreCase = true) -> Color(0xFFFEF3C7)
+        else -> MaterialTheme.colorScheme.errorContainer
+    }
+
+    Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+        // Stat row
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            StatInfoCard(
+                value = "${data.totalPayments ?: 0}",
+                label = "Payments",
                 color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(56.dp)
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        Icons.Default.Person,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier.size(32.dp)
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.width(16.dp))
-            Column {
-                Text(
-                    "Hello, $name! 👋",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-                Text(
-                    "Ready to crush your workout?",
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
-                )
-            }
+                modifier = Modifier.weight(1f)
+            )
+            StatInfoCard(
+                value = "₱${String.format("%,.0f", data.totalSpent ?: 0.0)}",
+                label = "Total Spent",
+                color = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier.weight(1f)
+            )
+            StatInfoCard(
+                value = membershipStatus,
+                label = "Status",
+                color = statusColor,
+                modifier = Modifier.weight(1f)
+            )
         }
-    }
-}
 
-@Composable
-fun MembershipCard() {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
-        Column(modifier = Modifier.padding(20.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column {
-                    Text(
-                        "Current Membership",
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f),
-                        fontSize = 13.sp
-                    )
-                    Text(
-                        "✨ Premium Plan",
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-                Badge(
-                    containerColor = MaterialTheme.colorScheme.primary,
+        // Membership Card
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+            elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
+        ) {
+            Column(modifier = Modifier.padding(20.dp)) {
+                Row(
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
+                    Text("Current Membership", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Surface(shape = RoundedCornerShape(999.dp), color = statusBg) {
+                        Text(
+                            membershipStatus,
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = statusColor
+                        )
+                    }
+                }
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    data.membershipName ?: "No Active Plan",
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                if (data.expirationDate != null) {
+                    Spacer(Modifier.height(4.dp))
                     Text(
-                        "ACTIVE",
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 12.sp
+                        "Expires: ${data.expirationDate.take(10)}",
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
+                if (data.startDate != null) {
+                    Text(
+                        "Started: ${data.startDate.take(10)}",
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Spacer(Modifier.height(16.dp))
+                Button(
+                    onClick = onNavigateToPlans,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(10.dp)
+                ) {
+                    Icon(Icons.Default.Upgrade, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text(if (isActive) "Upgrade Plan" else "Get a Plan", fontWeight = FontWeight.Bold)
+                }
             }
-            Spacer(modifier = Modifier.height(12.dp))
-            LinearProgressIndicator(
-                progress = { 0.65f },
+        }
+
+        // Payment status card
+        if (data.paymentReference != null) {
+            Card(
                 modifier = Modifier.fillMaxWidth(),
-                color = MaterialTheme.colorScheme.primary
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                shape = RoundedCornerShape(14.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
             ) {
-                Text(
-                    "65% used",
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer
-                )
-                Text(
-                    "Valid until: Dec 31, 2026",
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer
-                )
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-            Button(
-                onClick = {},
-                modifier = Modifier.fillMaxWidth(),
-                shape = androidx.compose.foundation.shape.RoundedCornerShape(10.dp)
-            ) {
-                Icon(Icons.Default.Upgrade, contentDescription = null)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Upgrade or Renew")
+                Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        Icons.Default.Receipt,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.secondary,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(Modifier.width(12.dp))
+                    Column {
+                        Text("Last Payment", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f))
+                        Text(
+                            data.paymentReference,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-fun ActionCard(
-    icon: ImageVector,
-    label: String,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit
-) {
-    Card(
-        onClick = onClick,
-        modifier = modifier,
-        shape = androidx.compose.foundation.shape.RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Icon(
-                icon,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(32.dp)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                label,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.SemiBold,
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center
-            )
-        }
-    }
-}
-
-@Composable
-fun StatCard(value: String, label: String, modifier: Modifier = Modifier) {
+fun StatInfoCard(value: String, label: String, color: Color, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier,
-        shape = androidx.compose.foundation.shape.RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = color.copy(alpha = 0.08f))
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                value,
-                fontSize = 28.sp,
-                fontWeight = FontWeight.ExtraBold,
-                color = MaterialTheme.colorScheme.primary
-            )
-            Text(
-                label,
-                fontSize = 11.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                lineHeight = 15.sp
-            )
+            Text(value, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp, color = color, maxLines = 1)
+            Text(label, fontSize = 10.sp, color = color.copy(alpha = 0.7f))
         }
     }
 }

@@ -2,14 +2,15 @@ package com.example.gymmembershipapp.network
 
 import com.example.gymmembershipapp.data.ApiResponse
 import com.example.gymmembershipapp.data.AuthResponse
+import com.example.gymmembershipapp.data.DashboardData
 import com.example.gymmembershipapp.data.LoginRequest
 import com.example.gymmembershipapp.data.MembershipDTO
+import com.example.gymmembershipapp.data.PaymentDTO
+import com.example.gymmembershipapp.data.PaymentRequest
+import com.example.gymmembershipapp.data.PaymentResponse
 import com.example.gymmembershipapp.data.RegisterRequest
 import retrofit2.Response
-import retrofit2.http.Body
-import retrofit2.http.GET
-import retrofit2.http.POST
-import retrofit2.http.Path
+import retrofit2.http.*
 
 interface ApiService {
 
@@ -27,4 +28,16 @@ interface ApiService {
 
     @GET("api/v1/memberships/{id}")
     suspend fun getMembershipById(@Path("id") id: Long): Response<ApiResponse<MembershipDTO>>
+
+    @POST("api/v1/user/membership/select")
+    suspend fun selectMembership(@Body body: Map<String, Long>): Response<ApiResponse<Any>>
+
+    @POST("api/v1/payments")
+    suspend fun createPayment(@Body request: PaymentRequest): Response<ApiResponse<PaymentResponse>>
+
+    @GET("api/v1/payments/history")
+    suspend fun getPaymentHistory(): Response<ApiResponse<List<PaymentDTO>>>
+
+    @GET("api/v1/dashboard")
+    suspend fun getDashboard(): Response<ApiResponse<DashboardData>>
 }

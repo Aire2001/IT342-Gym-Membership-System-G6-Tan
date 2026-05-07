@@ -16,6 +16,7 @@ import com.example.gymmembershipapp.network.RetrofitClient
 import com.example.gymmembershipapp.network.TokenManager
 import com.example.gymmembershipapp.ui.theme.GymMembershipAppTheme
 import com.example.gymmembershipapp.viewmodel.AuthViewModel
+import com.example.gymmembershipapp.viewmodel.MembershipViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,10 +26,16 @@ class MainActivity : ComponentActivity() {
         val tokenManager = TokenManager(applicationContext)
         val apiService = RetrofitClient.createService(tokenManager)
 
-        val factory = object : ViewModelProvider.Factory {
+        val authFactory = object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 @Suppress("UNCHECKED_CAST")
-                return AuthViewModel(apiService, tokenManager) as T
+                return when {
+                    modelClass.isAssignableFrom(AuthViewModel::class.java) ->
+                        AuthViewModel(apiService, tokenManager) as T
+                    modelClass.isAssignableFrom(MembershipViewModel::class.java) ->
+                        MembershipViewModel(apiService) as T
+                    else -> throw IllegalArgumentException("Unknown ViewModel: ${modelClass.name}")
+                }
             }
         }
 
@@ -38,8 +45,12 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    val authViewModel: AuthViewModel = viewModel(factory = factory)
-                    AppNavigation(authViewModel = authViewModel)
+                    val authViewModel: AuthViewModel = viewModel(factory = authFactory)
+                    val membershipViewModel: MembershipViewModel = viewModel(factory = authFactory)
+                    AppNavigation(
+                        authViewModel = authViewModel,
+                        membershipViewModel = membershipViewModel
+                    )
                 }
             }
         }

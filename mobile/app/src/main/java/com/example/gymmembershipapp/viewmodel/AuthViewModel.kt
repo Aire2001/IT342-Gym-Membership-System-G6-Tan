@@ -25,6 +25,8 @@ data class UserInfo(
     val role: String
 )
 
+
+
 class AuthViewModel(
     private val apiService: ApiService,
     private val tokenManager: TokenManager
@@ -43,7 +45,7 @@ class AuthViewModel(
                 firstName = tokenManager.getFirstName() ?: "Member",
                 lastName = tokenManager.getLastName() ?: "",
                 email = tokenManager.getEmail() ?: "",
-                role = "USER"
+                role = tokenManager.getRole()
             )
         }
     }
@@ -59,17 +61,16 @@ class AuthViewModel(
                 val response = apiService.login(LoginRequest(email.trim(), password))
                 if (response.isSuccessful && response.body()?.success == true) {
                     val authData = response.body()?.data
+                    val role = authData?.role ?: "USER"
                     tokenManager.saveToken(authData?.token ?: "")
                     tokenManager.saveEmail(authData?.email ?: email)
-                    tokenManager.saveName(
-                        authData?.firstName ?: "",
-                        authData?.lastName ?: ""
-                    )
+                    tokenManager.saveName(authData?.firstName ?: "", authData?.lastName ?: "")
+                    tokenManager.saveRole(role)
                     _userInfo.value = UserInfo(
                         firstName = authData?.firstName ?: "",
                         lastName = authData?.lastName ?: "",
                         email = authData?.email ?: email,
-                        role = authData?.role ?: "USER"
+                        role = role
                     )
                     _authState.value = AuthState.Success("Login successful")
                 } else {
@@ -108,17 +109,16 @@ class AuthViewModel(
                 val response = apiService.register(request)
                 if (response.isSuccessful && response.body()?.success == true) {
                     val authData = response.body()?.data
+                    val role = authData?.role ?: "USER"
                     tokenManager.saveToken(authData?.token ?: "")
                     tokenManager.saveEmail(authData?.email ?: email)
-                    tokenManager.saveName(
-                        authData?.firstName ?: firstName,
-                        authData?.lastName ?: lastName
-                    )
+                    tokenManager.saveName(authData?.firstName ?: firstName, authData?.lastName ?: lastName)
+                    tokenManager.saveRole(role)
                     _userInfo.value = UserInfo(
                         firstName = authData?.firstName ?: firstName,
                         lastName = authData?.lastName ?: lastName,
                         email = authData?.email ?: email,
-                        role = authData?.role ?: "USER"
+                        role = role
                     )
                     _authState.value = AuthState.Success("Registration successful")
                 } else {

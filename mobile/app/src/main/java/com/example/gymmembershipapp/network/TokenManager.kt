@@ -29,6 +29,14 @@ class TokenManager(context: Context) {
     fun getFirstName(): String? = prefs.getString(KEY_FIRST_NAME, null)
     fun getLastName(): String? = prefs.getString(KEY_LAST_NAME, null)
 
+    fun saveRole(role: String) {
+        prefs.edit().putString(KEY_ROLE, role).apply()
+    }
+
+    fun getRole(): String = prefs.getString(KEY_ROLE, "USER") ?: "USER"
+
+    fun isAdmin(): Boolean = getRole().equals("ADMIN", ignoreCase = true)
+
     fun clearAll() {
         prefs.edit().clear().apply()
     }
@@ -41,5 +49,6 @@ class TokenManager(context: Context) {
         private const val KEY_EMAIL = "user_email"
         private const val KEY_FIRST_NAME = "first_name"
         private const val KEY_LAST_NAME = "last_name"
+        private const val KEY_ROLE = "user_role"
     }
 }
