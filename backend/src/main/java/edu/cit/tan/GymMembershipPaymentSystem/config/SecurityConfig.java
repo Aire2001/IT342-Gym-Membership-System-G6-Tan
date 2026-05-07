@@ -1,6 +1,6 @@
 package edu.cit.tan.GymMembershipPaymentSystem.config;
 
-import edu.cit.tan.GymMembershipPaymentSystem.service.CustomUserDetailsService;
+import edu.cit.tan.GymMembershipPaymentSystem.shared.service.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

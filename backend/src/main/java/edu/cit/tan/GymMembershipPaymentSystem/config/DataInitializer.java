@@ -1,7 +1,7 @@
 package edu.cit.tan.GymMembershipPaymentSystem.config;
 
-import edu.cit.tan.GymMembershipPaymentSystem.entity.Membership;
-import edu.cit.tan.GymMembershipPaymentSystem.repository.MembershipRepository;
+import edu.cit.tan.GymMembershipPaymentSystem.shared.entity.Membership;
+import edu.cit.tan.GymMembershipPaymentSystem.shared.repository.MembershipRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

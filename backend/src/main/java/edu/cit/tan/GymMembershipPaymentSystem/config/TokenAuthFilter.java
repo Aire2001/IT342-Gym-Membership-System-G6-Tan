@@ -1,8 +1,8 @@
 package edu.cit.tan.GymMembershipPaymentSystem.config;
 
-import edu.cit.tan.GymMembershipPaymentSystem.entity.AuthToken;
-import edu.cit.tan.GymMembershipPaymentSystem.entity.User;
-import edu.cit.tan.GymMembershipPaymentSystem.repository.AuthTokenRepository;
+import edu.cit.tan.GymMembershipPaymentSystem.shared.entity.AuthToken;
+import edu.cit.tan.GymMembershipPaymentSystem.shared.entity.User;
+import edu.cit.tan.GymMembershipPaymentSystem.shared.repository.AuthTokenRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
