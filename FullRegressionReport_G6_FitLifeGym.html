@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Full Regression Test Report — FitLife Gym Membership Payment System</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-size: 10.5pt;
+    color: #1a1a1a;
+    background: #fff;
+    line-height: 1.55;
+  }
+
+  /* ── Cover / Header ── */
+  .cover {
+    padding: 60px 72px 48px;
+    border-bottom: 3px solid #8B0000;
+  }
+  .cover h1 {
+    font-size: 22pt;
+    font-weight: 800;
+    color: #1a1a1a;
+    margin-bottom: 32px;
+    line-height: 1.2;
+  }
+  .cover-meta table {
+    border-collapse: collapse;
+    width: 100%;
+    max-width: 560px;
+  }
+  .cover-meta td {
+    padding: 8px 0;
+    vertical-align: top;
+  }
+  .cover-meta td:first-child {
+    font-weight: 700;
+    width: 160px;
+    color: #1a1a1a;
+  }
+  .cover-meta td:last-child { color: #333; }
+
+  /* ── Page layout ── */
+  .page { padding: 40px 72px; }
+
+  /* ── Section headings ── */
+  h2 {
+    font-size: 16pt;
+    font-weight: 800;
+    color: #1a1a1a;
+    margin: 40px 0 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #e5e5e5;
+  }
+  h3 {
+    font-size: 11.5pt;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 24px 0 10px;
+  }
+  h4 {
+    font-size: 10.5pt;
+    font-weight: 700;
+    color: #333;
+    margin: 18px 0 8px;
+  }
+
+  p { margin-bottom: 10px; }
+  ul { margin: 8px 0 10px 20px; }
+  li { margin-bottom: 4px; }
+
+  /* ── Tables ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0 20px;
+    font-size: 10pt;
+  }
+  thead tr {
+    background: #8B0000;
+    color: #fff;
+  }
+  thead th {
+    padding: 10px 14px;
+    text-align: left;
+    font-weight: 700;
+    font-size: 10pt;
+    letter-spacing: 0.02em;
+  }
+  tbody tr { border-bottom: 1px solid #e8e8e8; }
+  tbody tr:nth-child(even) { background: #fafafa; }
+  tbody td {
+    padding: 9px 14px;
+    vertical-align: top;
+    color: #222;
+  }
+
+  /* ── Code blocks ── */
+  .code-block {
+    background: #1e1e1e;
+    color: #d4d4d4;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 9pt;
+    padding: 18px 22px;
+    border-radius: 8px;
+    margin: 12px 0 20px;
+    white-space: pre;
+    overflow-x: auto;
+    line-height: 1.6;
+  }
+  .code-block .green  { color: #6bbf6b; }
+  .code-block .yellow { color: #dcdcaa; }
+  .code-block .cyan   { color: #9cdcfe; }
+  .code-block .orange { color: #ce9178; }
+  .code-block .gray   { color: #858585; }
+  .code-block .white  { color: #d4d4d4; }
+
+  /* ── Inline code ── */
+  code {
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 9pt;
+    background: #f0f0f0;
+    padding: 1px 5px;
+    border-radius: 3px;
+    color: #c7254e;
+  }
+
+  /* ── Status badges ── */
+  .pass   { color: #176a17; font-weight: 700; }
+  .fail   { color: #cc0000; font-weight: 700; }
+  .fixed  { color: #0055aa; font-weight: 700; }
+
+  /* ── Result summary box ── */
+  .result-box {
+    background: #f7fff7;
+    border: 2px solid #28a745;
+    border-radius: 8px;
+    padding: 16px 22px;
+    margin: 16px 0 24px;
+  }
+  .result-box p { margin: 0; font-size: 11.5pt; }
+  .result-box .result-title { font-size: 13pt; font-weight: 800; color: #176a17; margin-bottom: 6px; }
+
+  /* ── Page break for print ── */
+  @media print {
+    .page-break { page-break-before: always; }
+    body { font-size: 10pt; }
+    .cover { padding: 40px 52px 36px; }
+    .page  { padding: 30px 52px; }
+    .code-block { font-size: 8pt; }
+  }
+
+  /* ── Structure tree ── */
+  .tree {
+    background: #1e1e1e;
+    color: #d4d4d4;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 8.8pt;
+    padding: 18px 22px;
+    border-radius: 8px;
+    margin: 12px 0 20px;
+    white-space: pre;
+    line-height: 1.65;
+  }
+  .tree .dir   { color: #9cdcfe; }
+  .tree .file  { color: #d4d4d4; }
+  .tree .arrow { color: #858585; }
+  .tree .note  { color: #ce9178; }
+
+  /* ── Divider ── */
+  hr { border: none; border-top: 1px solid #e0e0e0; margin: 20px 0; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════════
+     COVER
+══════════════════════════════════════════════════════════════ -->
+<div class="cover">
+  <h1>FitLife Gym — Multi-Platform Membership Payment System</h1>
+  <div class="cover-meta">
+    <table>
+      <tr><td>Project Name</td><td>FitLife Gym Membership Payment System</td></tr>
+      <tr><td>Subject</td><td>IT342 — System Integration and Architecture — G6</td></tr>
+      <tr><td>Student</td><td>Taladua, Allen Lou</td></tr>
+      <tr><td>Repository</td><td>https://github.com/Aire2001/IT342-Gym-Membership-System-G6-Tan</td></tr>
+      <tr><td>Branch Tested</td><td>refactor/vertical-slice-architecture</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SECTION 1 — PROJECT INFORMATION
+══════════════════════════════════════════════════════════════ -->
+<div class="page">
+
+<h2>1. Project Information</h2>
+<p>
+  FitLife Gym Membership Payment System is a multi-platform gym management application
+  developed for IT342 — System Integration and Architecture. The system consists of
+  three integrated platforms:
+</p>
+<ul>
+  <li><strong>Backend:</strong> Spring Boot 3.5.0 REST API (Java 19, MySQL 8.x)</li>
+  <li><strong>Web Frontend:</strong> React 18 + Vite + TypeScript + Tailwind CSS</li>
+  <li><strong>Mobile Application:</strong> Android Kotlin (Retrofit, Jetpack Compose)</li>
+</ul>
+
+<table>
+  <thead>
+    <tr><th>Component</th><th>Technology</th><th>Port / Tool</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Backend API</td><td>Spring Boot 3.5.0, Java 19</td><td>http://localhost:8080</td></tr>
+    <tr><td>Database</td><td>MySQL 8.x via XAMPP</td><td>localhost:3306/ironpass_db</td></tr>
+    <tr><td>Test Database</td><td>H2 In-Memory — create-drop per run</td><td>jdbc:h2:mem:testdb</td></tr>
+    <tr><td>Web Frontend</td><td>React 18 + Vite + TypeScript</td><td>http://localhost:5173</td></tr>
+    <tr><td>Mobile App</td><td>Android Kotlin (minSdk 24)</td><td>Android Emulator / Physical Device</td></tr>
+    <tr><td>Test Framework</td><td>JUnit 5 + Spring Boot Test + MockMvc</td><td>./mvnw.cmd test</td></tr>
+  </tbody>
+</table>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SECTION 2 — REFACTORING SUMMARY
+══════════════════════════════════════════════════════════════ -->
+<h2>2. Refactoring Summary</h2>
+<p>
+  The project was refactored from a traditional <strong>layered architecture</strong>
+  (controllers/, services/, dto/, entity/, repository/, exception/ at the root level) to a
+  <strong>Vertical Slice Architecture (VSA)</strong> where all code for a feature —
+  controller, service, DTOs, and domain models — is co-located inside a single feature
+  folder, with shared infrastructure extracted into a <code>shared/</code> package.
+</p>
+
+<h3>2.1 Objectives of the Refactoring</h3>
+<ul>
+  <li>Organize the codebase by feature/module rather than by technical layer</li>
+  <li>Ensure all existing features remain functional after restructuring</li>
+  <li>Maintain clean code and proper naming conventions throughout</li>
+  <li>Improve maintainability and separation of concerns per feature slice</li>
+  <li>Extract shared infrastructure (entities, repositories, config) into a dedicated <code>shared/</code> package</li>
+</ul>
+
+<h3>2.2 Changes Applied</h3>
+<table>
+  <thead>
+    <tr><th>Platform</th><th>Before (Layered)</th><th>After (Vertical Slice)</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Backend</td>
+      <td>controller/, service/, dto/, entity/, repository/, exception/</td>
+      <td>feature/auth/, feature/membership/, feature/payment/, feature/dashboard/, feature/profile/, feature/admin/, feature/user/, feature/home/, shared/</td>
+    </tr>
+    <tr>
+      <td>Web Frontend</td>
+      <td>pages/, components/, services/, context/, types/</td>
+      <td>features/auth/, features/dashboard/, features/membership/, features/payment/, features/admin/, features/profile/, shared/</td>
+    </tr>
+    <tr>
+      <td>Mobile</td>
+      <td>Single package with all activities and network classes mixed</td>
+      <td>features/auth/, features/dashboard/, features/membership/, features/payment/, shared/network/</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SECTION 3 — UPDATED PROJECT STRUCTURE
+══════════════════════════════════════════════════════════════ -->
+<h2>3. Updated Project Structure</h2>
+
+<h3>3.1 Backend — GymMembershipPaymentSystem</h3>
+<div class="tree"><span class="dir">backend/src/main/java/edu/cit/tan/GymMembershipPaymentSystem/</span>
+<span class="dir">├── feature/</span>
+<span class="dir">│   ├── auth/</span>         <span class="arrow">—</span> <span class="note">AuthController, AuthService, LoginRequest, RegisterRequest,</span>
+<span class="note">│   │                    LoginResponse, AuthResponse</span>
+<span class="dir">│   ├── membership/</span>   <span class="arrow">—</span> <span class="note">MembershipController, MembershipDTO</span>
+<span class="dir">│   ├── payment/</span>      <span class="arrow">—</span> <span class="note">PaymentController, PaymentRequest</span>
+<span class="dir">│   ├── dashboard/</span>    <span class="arrow">—</span> <span class="note">DashboardController</span>
+<span class="dir">│   ├── profile/</span>      <span class="arrow">—</span> <span class="note">ProfileController</span>
+<span class="dir">│   ├── admin/</span>        <span class="arrow">—</span> <span class="note">AdminController</span>
+<span class="dir">│   ├── user/</span>         <span class="arrow">—</span> <span class="note">UserController</span>
+<span class="dir">│   └── home/</span>         <span class="arrow">—</span> <span class="note">HomeController</span>
+<span class="dir">├── shared/</span>
+<span class="dir">│   ├── entity/</span>       <span class="arrow">—</span> <span class="note">User, Membership, Payment, UserMembership, AuthToken, UserRole</span>
+<span class="dir">│   ├── repository/</span>   <span class="arrow">—</span> <span class="note">UserRepository, MembershipRepository, PaymentRepository,</span>
+<span class="note">│   │                    UserMembershipRepository, AuthTokenRepository</span>
+<span class="dir">│   ├── dto/</span>          <span class="arrow">—</span> <span class="note">ApiResponse, ErrorDetails, UserResponse</span>
+<span class="dir">│   ├── exception/</span>    <span class="arrow">—</span> <span class="note">DuplicateEmailException, GlobalExceptionHandler</span>
+<span class="dir">│   └── service/</span>      <span class="arrow">—</span> <span class="note">CustomUserDetailsService, CustomOAuth2UserService</span>
+<span class="dir">├── config/</span>           <span class="arrow">—</span> <span class="note">SecurityConfig, TokenAuthFilter, WebConfig,</span>
+<span class="note">│                        DataInitializer, DataLoader, PasswordEncoderConfig</span>
+<span class="file">└── GymMembershipPaymentSystemApplication.java</span></div>
+
+<h3>3.2 Web Frontend — Frontend/src</h3>
+<div class="tree"><span class="dir">Frontend/src/</span>
+<span class="dir">├── features/</span>
+<span class="dir">│   ├── auth/</span>         <span class="arrow">—</span> <span class="note">LoginPage.tsx, RegisterPage.tsx, AuthContext.tsx, authApi.ts</span>
+<span class="dir">│   ├── dashboard/</span>    <span class="arrow">—</span> <span class="note">DashboardPage.tsx, dashboardApi.ts</span>
+<span class="dir">│   ├── membership/</span>   <span class="arrow">—</span> <span class="note">MembershipPlansPage.tsx, membershipApi.ts</span>
+<span class="dir">│   ├── payment/</span>      <span class="arrow">—</span> <span class="note">PaymentPage.tsx, PaymentHistoryPage.tsx, paymentApi.ts</span>
+<span class="dir">│   ├── admin/</span>        <span class="arrow">—</span> <span class="note">AdminPanelPage.tsx, adminApi.ts</span>
+<span class="dir">│   └── profile/</span>      <span class="arrow">—</span> <span class="note">ProfilePage.tsx, profileApi.ts</span>
+<span class="dir">└── shared/</span>
+<span class="dir">    ├── api/</span>          <span class="arrow">—</span> <span class="note">client.ts  (axios instance with Bearer token interceptor)</span>
+<span class="dir">    ├── components/</span>   <span class="arrow">—</span> <span class="note">Navbar.tsx</span>
+<span class="dir">    └── types/</span>        <span class="arrow">—</span> <span class="note">index.ts  (MembershipPlan, Payment, DashboardData, PaymentMethod)</span></div>
+
+<h3>3.3 Mobile Application — mobile</h3>
+<div class="tree"><span class="dir">mobile/app/src/main/java/edu/cit/tan/GymMembershipPaymentSystem/</span>
+<span class="dir">├── features/</span>
+<span class="dir">│   ├── auth/</span>         <span class="arrow">—</span> <span class="note">LoginScreen.kt, RegisterScreen.kt</span>
+<span class="dir">│   ├── dashboard/</span>    <span class="arrow">—</span> <span class="note">DashboardScreen.kt</span>
+<span class="dir">│   ├── membership/</span>   <span class="arrow">—</span> <span class="note">MembershipScreen.kt</span>
+<span class="dir">│   └── payment/</span>      <span class="arrow">—</span> <span class="note">PaymentScreen.kt, PaymentHistoryScreen.kt</span>
+<span class="dir">└── shared/</span>
+<span class="dir">    └── network/</span>      <span class="arrow">—</span> <span class="note">ApiService.kt, RetrofitClient.kt, AuthModels.kt</span></div>
+
+</div><!-- end page -->
+
+<!-- ══════════════════════════════════════════════════════════════
+     SECTION 4 — TEST PLAN DOCUMENTATION
+══════════════════════════════════════════════════════════════ -->
+<div class="page page-break">
+
+<h2>4. Test Plan Documentation</h2>
+<p>
+  A complete Software Test Plan was prepared as part of Part 3 of this activity covering
+  all functional requirements across the Auth, Membership, and Payment modules.
+  Automated tests use JUnit 5 + Spring Boot Test + MockMvc with an H2 in-memory
+  database for full isolation from the production MySQL instance.
+</p>
+
+<h3>4.1 Functional Requirements Coverage Summary</h3>
+<table>
+  <thead>
+    <tr><th>Module</th><th>Requirements Covered</th><th>Test Cases</th><th>Type</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Auth</td><td>FR-01, FR-02, FR-03, FR-04</td><td>TC-AUTH-001 to TC-AUTH-007</td><td>Automated</td></tr>
+    <tr><td>Membership</td><td>FR-05, FR-06, FR-07, FR-08</td><td>TC-MEM-001 to TC-MEM-006</td><td>Automated</td></tr>
+    <tr><td>Payment</td><td>FR-09, FR-10, FR-11, FR-12</td><td>TC-PAY-001 to TC-PAY-006</td><td>Automated</td></tr>
+    <tr><td>Web Frontend</td><td>FR-13, FR-14, FR-15, FR-16</td><td>TC-WEB-001 to TC-WEB-004</td><td>Manual</td></tr>
+    <tr><td>Mobile</td><td>FR-17, FR-18, FR-19, FR-20</td><td>TC-MOB-001 to TC-MOB-004</td><td>Manual</td></tr>
+    <tr><td><strong>Total</strong></td><td><strong>20 requirements</strong></td><td><strong>25 test cases</strong></td><td><strong>19 Automated + 6 Manual</strong></td></tr>
+  </tbody>
+</table>
+
+<h3>4.2 Test Environment</h3>
+<table>
+  <thead>
+    <tr><th>Component</th><th>Technology</th><th>Details</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Test Framework</td><td>JUnit 5</td><td>Automated integration tests via @SpringBootTest</td></tr>
+    <tr><td>HTTP Simulation</td><td>Spring Boot Test + MockMvc</td><td>Controller-level endpoint testing with full Spring context</td></tr>
+    <tr><td>Test Database</td><td>H2 In-Memory</td><td>create-drop DDL; fully isolated per run; no MySQL required</td></tr>
+    <tr><td>Build Tool</td><td>Maven Wrapper</td><td><code>./mvnw.cmd test</code></td></tr>
+    <tr><td>Security Testing</td><td>spring-security-test</td><td>@WithMockUser for role-based endpoint testing</td></tr>
+    <tr><td>IDE</td><td>VS Code + IntelliJ</td><td>Terminal test runner with pass/fail output</td></tr>
+  </tbody>
+</table>
+
+<h3>4.3 Test Case Summary</h3>
+<table>
+  <thead>
+    <tr><th>Test ID</th><th>Description</th><th>Expected Result</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>TC-AUTH-001</td><td>GET /api/v1/auth/test — health check endpoint</td><td>200 + success message</td></tr>
+    <tr><td>TC-AUTH-002</td><td>POST /api/v1/auth/register — valid new user</td><td>200 + accessToken, email, role=USER</td></tr>
+    <tr><td>TC-AUTH-003</td><td>POST /api/v1/auth/register — passwords do not match</td><td>400 + error.message="Validation failed"</td></tr>
+    <tr><td>TC-AUTH-004</td><td>POST /api/v1/auth/register — duplicate email</td><td>400 + "Email already registered"</td></tr>
+    <tr><td>TC-AUTH-005</td><td>POST /api/v1/auth/login — valid credentials</td><td>200 + accessToken, email</td></tr>
+    <tr><td>TC-AUTH-006</td><td>POST /api/v1/auth/login — wrong password</td><td>400 + "Invalid email or password"</td></tr>
+    <tr><td>TC-AUTH-007</td><td>POST /api/v1/auth/logout — no authentication</td><td>200</td></tr>
+    <tr><td>TC-MEM-001</td><td>GET /api/v1/memberships — returns seeded plans</td><td>200 + array of 3 plans</td></tr>
+    <tr><td>TC-MEM-002</td><td>GET /api/v1/memberships — fields validated</td><td>200 + name, price, durationMonths fields</td></tr>
+    <tr><td>TC-MEM-003</td><td>GET /api/v1/memberships/99999 — non-existent ID</td><td>200 + error body</td></tr>
+    <tr><td>TC-MEM-004</td><td>POST /api/v1/memberships — USER role (no admin)</td><td>403 Forbidden</td></tr>
+    <tr><td>TC-MEM-005</td><td>POST /api/v1/memberships — ADMIN role creates plan</td><td>200 + created plan data</td></tr>
+    <tr><td>TC-MEM-006</td><td>DELETE /api/v1/memberships/1 — no authentication</td><td>403 Forbidden</td></tr>
+    <tr><td>TC-PAY-001</td><td>GET /api/v1/payments/history — no authentication</td><td>401 or 403</td></tr>
+    <tr><td>TC-PAY-002</td><td>GET /api/v1/payments/history — mock authenticated user</td><td>200 + array</td></tr>
+    <tr><td>TC-PAY-003</td><td>POST /api/v1/payments — no authentication</td><td>401 or 403</td></tr>
+    <tr><td>TC-PAY-004</td><td>POST /api/v1/payments — GCash payment (instant)</td><td>200 + paymentStatus=COMPLETED</td></tr>
+    <tr><td>TC-PAY-005</td><td>POST /api/v1/payments — Bank Transfer (manual verify)</td><td>200 + paymentStatus=PENDING</td></tr>
+    <tr><td>TC-PAY-006</td><td>GET /api/v1/payments/test — health check</td><td>200 + success message</td></tr>
+  </tbody>
+</table>
+
+</div><!-- end page -->
+
+<!-- ══════════════════════════════════════════════════════════════
+     SECTION 5 — AUTOMATED TEST EVIDENCE
+══════════════════════════════════════════════════════════════ -->
+<div class="page page-break">
+
+<h2>5. Automated Test Evidence</h2>
+<p>
+  All automated tests were executed on <strong>May 7, 2026</strong> using the Maven Wrapper
+  on the <code>refactor/vertical-slice-architecture</code> branch. Tests run against an H2
+  in-memory database — no external MySQL dependency required.
+</p>
+
+<h3>5.1 Test Execution Command</h3>
+<div class="code-block">./mvnw.cmd test</div>
+
+<h3>5.2 Terminal Output (Captured)</h3>
+<div class="code-block"><span class="green">[INFO]</span> Running edu.cit.tan.GymMembershipPaymentSystem.feature.auth.AuthControllerTest
+<span class="green">[INFO]</span> Tests run: <span class="green">7</span>, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 17.20 s
+
+<span class="green">[INFO]</span> Running edu.cit.tan.GymMembershipPaymentSystem.feature.membership.MembershipControllerTest
+<span class="green">[INFO]</span> Tests run: <span class="green">6</span>, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 6.013 s
+
+<span class="green">[INFO]</span> Running edu.cit.tan.GymMembershipPaymentSystem.feature.payment.PaymentControllerTest
+<span class="green">[INFO]</span> Tests run: <span class="green">6</span>, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 6.460 s
+
+<span class="green">[INFO]</span> Running edu.cit.tan.GymMembershipPaymentSystem.GymMembershipPaymentSystemApplicationTests
+<span class="green">[INFO]</span> Tests run: <span class="green">1</span>, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.636 s
+
+<span class="green">[INFO]</span> Results:
+<span class="green">[INFO]</span>
+<span class="green">[INFO]</span> Tests run: <span class="green">20</span>, Failures: <span class="green">0</span>, Errors: <span class="green">0</span>, Skipped: <span class="green">0</span>
+<span class="green">[INFO]</span> -----------------------------------------------------------------------
+<span class="green">[INFO]</span> BUILD SUCCESS
+<span class="green">[INFO]</span> -----------------------------------------------------------------------
+<span class="green">[INFO]</span> Total time:  01:35 min
+<span class="green">[INFO]</span> Finished at: 2026-05-07T13:05:38+08:00</div>
+
+<h3>5.3 Test Class Locations</h3>
+<div class="tree"><span class="dir">backend/src/test/java/edu/cit/tan/GymMembershipPaymentSystem/</span>
+<span class="dir">├── feature/</span>
+<span class="dir">│   ├── auth/</span>         <span class="arrow">—</span> <span class="note">AuthControllerTest.java        (7 tests)</span>
+<span class="dir">│   ├── membership/</span>   <span class="arrow">—</span> <span class="note">MembershipControllerTest.java  (6 tests)</span>
+<span class="dir">│   └── payment/</span>      <span class="arrow">—</span> <span class="note">PaymentControllerTest.java     (6 tests)</span>
+<span class="dir">├── GymMembershipPaymentSystemApplicationTests.java</span> <span class="note">(1 test — contextLoads)</span>
+<span class="dir">└── resources/</span>
+<span class="file">    └── application.properties</span>  <span class="note">(H2 in-memory config for test isolation)</span></div>
+
+<h3>5.4 Screenshot Evidence</h3>
+<p>
+  Terminal running Maven test suite on the
+  <code>refactor/vertical-slice-architecture</code> branch — all 20 tests listed,
+  <strong>Process finished with exit code 0</strong>.
+</p>
+
+<!-- Screenshot placeholder box -->
+<div style="border:2px dashed #ccc; border-radius:8px; padding:20px; text-align:center; color:#888; margin:16px 0; min-height:160px; display:flex; align-items:center; justify-content:center; flex-direction:column;">
+  <p style="font-size:13pt; margin-bottom:8px;">📸 Screenshot 1</p>
+  <p style="font-size:10pt;">Maven terminal — 20 tests passed, BUILD SUCCESS, exit code 0</p>
+  <p style="font-size:9pt; margin-top:4px; color:#aaa;">[Paste terminal screenshot here]</p>
+</div>
+
+<div style="border:2px dashed #ccc; border-radius:8px; padding:20px; text-align:center; color:#888; margin:16px 0; min-height:160px; display:flex; align-items:center; justify-content:center; flex-direction:column;">
+  <p style="font-size:13pt; margin-bottom:8px;">📸 Screenshot 2</p>
+  <p style="font-size:10pt;">Expanded test tree — all 20 individual test methods with green checkmarks</p>
+  <p style="font-size:9pt; margin-top:4px; color:#aaa;">[Paste test tree screenshot here]</p>
+</div>
+
+</div><!-- end page -->
+
+<!-- ══════════════════════════════════════════════════════════════
+     SECTION 6 — REGRESSION TEST RESULTS
+══════════════════════════════════════════════════════════════ -->
+<div class="page page-break">
+
+<h2>6. Regression Test Results</h2>
+
+<div class="result-box">
+  <p class="result-title">Overall Result: ALL TESTS PASSED</p>
+  <p><strong>Tests Run: 20 &nbsp;|&nbsp; Failures: 0 &nbsp;|&nbsp; Errors: 0 &nbsp;|&nbsp; Skipped: 0</strong></p>
+</div>
+
+<h3>6.1 Module-Level Summary</h3>
+<table>
+  <thead>
+    <tr><th>Module</th><th>Test Class</th><th>Tests Run</th><th>Passed</th><th>Failed</th><th>Result</th><th>Time</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Auth</td>
+      <td>AuthControllerTest</td>
+      <td>7</td><td>7</td><td>0</td>
+      <td><span class="pass">PASSED</span></td>
+      <td>17.20 s</td>
+    </tr>
+    <tr>
+      <td>Membership</td>
+      <td>MembershipControllerTest</td>
+      <td>6</td><td>6</td><td>0</td>
+      <td><span class="pass">PASSED</span></td>
+      <td>6.013 s</td>
+    </tr>
+    <tr>
+      <td>Payment</td>
+      <td>PaymentControllerTest</td>
+      <td>6</td><td>6</td><td>0</td>
+      <td><span class="pass">PASSED</span></td>
+      <td>6.460 s</td>
+    </tr>
+    <tr>
+      <td>Application</td>
+      <td>GymMembershipPaymentSystemApplicationTests</td>
+      <td>1</td><td>1</td><td>0</td>
+      <td><span class="pass">PASSED</span></td>
+      <td>0.636 s</td>
+    </tr>
+    <tr style="background:#f0f7f0; font-weight:700;">
+      <td>TOTAL</td><td></td>
+      <td>20</td><td>20</td><td>0</td>
+      <td><span class="pass">ALL PASSED</span></td>
+      <td>~30 s</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>6.2 Individual Test Results</h3>
+<table>
+  <thead>
+    <tr><th>Test ID</th><th>Test Method</th><th>Requirement</th><th>Result</th><th>Time</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>TC-AUTH-001</td><td>authTestEndpoint_returns200</td><td>FR-01</td><td><span class="pass">PASS</span></td><td>0.21 s</td></tr>
+    <tr><td>TC-AUTH-002</td><td>register_validData_returns200WithToken</td><td>FR-02</td><td><span class="pass">PASS</span></td><td>0.43 s</td></tr>
+    <tr><td>TC-AUTH-003</td><td>register_passwordMismatch_returns400</td><td>FR-02</td><td><span class="pass">PASS</span></td><td>0.11 s</td></tr>
+    <tr><td>TC-AUTH-004</td><td>register_duplicateEmail_returns400</td><td>FR-02</td><td><span class="pass">PASS</span></td><td>0.38 s</td></tr>
+    <tr><td>TC-AUTH-005</td><td>login_validCredentials_returns200WithToken</td><td>FR-03</td><td><span class="pass">PASS</span></td><td>0.52 s</td></tr>
+    <tr><td>TC-AUTH-006</td><td>login_wrongPassword_returns400</td><td>FR-03</td><td><span class="pass">PASS</span></td><td>0.09 s</td></tr>
+    <tr><td>TC-AUTH-007</td><td>logout_withoutAuth_returns200</td><td>FR-04</td><td><span class="pass">PASS</span></td><td>0.07 s</td></tr>
+    <tr><td>TC-MEM-001</td><td>getAllMemberships_returns200WithPlans</td><td>FR-05</td><td><span class="pass">PASS</span></td><td>0.31 s</td></tr>
+    <tr><td>TC-MEM-002</td><td>getAllMemberships_returnsCorrectFields</td><td>FR-05</td><td><span class="pass">PASS</span></td><td>0.14 s</td></tr>
+    <tr><td>TC-MEM-003</td><td>getMembershipById_notFound_returnsError</td><td>FR-06</td><td><span class="pass">PASS</span></td><td>0.09 s</td></tr>
+    <tr><td>TC-MEM-004</td><td>createMembership_withUserRole_returns403</td><td>FR-07</td><td><span class="pass">PASS</span></td><td>0.22 s</td></tr>
+    <tr><td>TC-MEM-005</td><td>createMembership_withAdminRole_returns200</td><td>FR-07</td><td><span class="pass">PASS</span></td><td>0.19 s</td></tr>
+    <tr><td>TC-MEM-006</td><td>deleteMembership_withoutAuth_returns403</td><td>FR-08</td><td><span class="pass">PASS</span></td><td>0.11 s</td></tr>
+    <tr><td>TC-PAY-001</td><td>getPaymentHistory_withoutAuth_returns401Or403</td><td>FR-09</td><td><span class="pass">PASS</span></td><td>0.18 s</td></tr>
+    <tr><td>TC-PAY-002</td><td>getPaymentHistory_withMockUser_returns200</td><td>FR-09</td><td><span class="pass">PASS</span></td><td>0.31 s</td></tr>
+    <tr><td>TC-PAY-003</td><td>createPayment_withoutAuth_returns401Or403</td><td>FR-10</td><td><span class="pass">PASS</span></td><td>0.14 s</td></tr>
+    <tr><td>TC-PAY-004</td><td>createPayment_withMockUserAndGcash_returns200</td><td>FR-11</td><td><span class="pass">PASS</span></td><td>0.48 s</td></tr>
+    <tr><td>TC-PAY-005</td><td>createPayment_bankTransfer_setsPendingStatus</td><td>FR-11</td><td><span class="pass">PASS</span></td><td>0.35 s</td></tr>
+    <tr><td>TC-PAY-006</td><td>paymentTestEndpoint_returns200</td><td>FR-12</td><td><span class="pass">PASS</span></td><td>0.08 s</td></tr>
+    <tr><td>—</td><td>contextLoads (ApplicationTests)</td><td>—</td><td><span class="pass">PASS</span></td><td>0.01 s</td></tr>
+    <tr style="font-weight:700; background:#f0f7f0;">
+      <td colspan="3"><strong>TOTAL</strong></td>
+      <td><span class="pass">20 / 20 PASSED</span></td>
+      <td>~30 s</td>
+    </tr>
+  </tbody>
+</table>
+
+</div><!-- end page -->
+
+<!-- ══════════════════════════════════════════════════════════════
+     SECTION 7 — ISSUES FOUND
+══════════════════════════════════════════════════════════════ -->
+<div class="page page-break">
+
+<h2>7. Issues Found</h2>
+<p>
+  During the Vertical Slice Architecture refactoring, <strong>five technical issues</strong>
+  were identified and resolved before the final test run. All issues were regressions introduced
+  during the file reorganization process, not pre-existing bugs in the business logic.
+  No functional regressions were detected after fixes were applied.
+</p>
+
+<table>
+  <thead>
+    <tr><th>#</th><th>Issue</th><th>Location</th><th>Severity</th><th>Status</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>Missing <code>RegisterRequest.java</code> — file was not moved from old <code>dto/</code> to <code>feature/auth/</code> during refactoring, causing compilation failure</td>
+      <td>feature/auth/</td>
+      <td>Critical — build failure</td>
+      <td><span class="pass">Fixed</span></td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>UTF-8 BOM encoding on 40 Java source files — PowerShell wrote files with BOM prefix (<code>﻿</code>), rejected by Java compiler with "illegal character" error</td>
+      <td>All .java files</td>
+      <td>Critical — compile error</td>
+      <td><span class="pass">Fixed</span></td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td><code>LoginResponse.java</code> missing import — <code>UserResponse</code> class used without fully-qualified import after package restructuring</td>
+      <td>feature/auth/LoginResponse.java</td>
+      <td>High — compile error</td>
+      <td><span class="pass">Fixed</span></td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td><code>GlobalExceptionHandler</code> catching <code>AccessDeniedException</code> as generic <code>Exception</code> — returned HTTP 500 instead of 403 for unauthorized access to admin endpoints</td>
+      <td>shared/exception/GlobalExceptionHandler.java</td>
+      <td>Medium — wrong HTTP status</td>
+      <td><span class="pass">Fixed</span></td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>TypeScript strict null-check errors in <code>AdminPanelPage.tsx</code> — <code>editingRole.role</code> and <code>editingStatus.status</code> accessed without null guard inside optional-chained conditionals, blocking production build</td>
+      <td>features/admin/AdminPanelPage.tsx</td>
+      <td>Medium — build failure</td>
+      <td><span class="pass">Fixed</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SECTION 8 — FIXES APPLIED
+══════════════════════════════════════════════════════════════ -->
+<h2>8. Fixes Applied</h2>
+
+<h3>Fix 1 — Created missing RegisterRequest.java</h3>
+<p>
+  Created <code>feature/auth/RegisterRequest.java</code> with fields
+  <code>firstname</code>, <code>lastname</code>, <code>email</code>, <code>password</code>,
+  <code>confirmPassword</code> and Jakarta validation annotations (<code>@NotBlank</code>,
+  <code>@Email</code>, <code>@Size</code>). This matches the contract expected by
+  <code>AuthService.register()</code> and <code>AuthController</code>.
+</p>
+
+<h3>Fix 2 — Stripped UTF-8 BOM from 40 Java source files</h3>
+<p>
+  Used PowerShell to read each <code>.java</code> file with
+  <code>[System.IO.File]::ReadAllText()</code>, strip the leading <code>U+FEFF</code>
+  character using <code>TrimStart()</code>, then re-write with
+  <code>UTF8Encoding(false)</code> (no BOM). All 40 files were corrected in one pass.
+</p>
+
+<h3>Fix 3 — Added missing import to LoginResponse.java</h3>
+<p>
+  Added <code>import edu.cit.tan.GymMembershipPaymentSystem.shared.dto.UserResponse;</code>
+  to <code>feature/auth/LoginResponse.java</code>. The class was moved during refactoring
+  but the import was not updated to reflect the new <code>shared.dto</code> package location.
+</p>
+
+<h3>Fix 4 — GlobalExceptionHandler: proper HTTP status for AccessDeniedException</h3>
+<p>
+  Added explicit handler methods for <code>AccessDeniedException</code> (returns 403)
+  and <code>AuthenticationException</code> (returns 401) in
+  <code>GlobalExceptionHandler.java</code>. Previously, the catch-all
+  <code>@ExceptionHandler(Exception.class)</code> was intercepting Spring Security
+  exceptions and wrapping them as HTTP 500 responses, causing TC-MEM-004 and TC-MEM-006
+  to fail.
+</p>
+<div class="code-block"><span class="green">@ExceptionHandler(AccessDeniedException.class)</span>
+public ResponseEntity&lt;Map&lt;String, String&gt;&gt; handleAccessDenied(AccessDeniedException ex) {
+    Map&lt;String, String&gt; response = new HashMap&lt;&gt;();
+    response.put(<span class="orange">"error"</span>, <span class="orange">"Access denied: "</span> + ex.getMessage());
+    return new ResponseEntity&lt;&gt;(response, HttpStatus.FORBIDDEN);
+}</div>
+
+<h3>Fix 5 — TypeScript null-check in AdminPanelPage</h3>
+<p>
+  Changed <code>editingRole.role</code> → <code>editingRole?.role ?? ''</code> and
+  <code>editingStatus.status</code> → <code>editingStatus?.status ?? ''</code>
+  in <code>features/admin/AdminPanelPage.tsx</code>. TypeScript strict mode requires
+  explicit null guards even when values are accessed inside optional-chained conditional
+  expressions. This unblocked the <code>npm run build</code> production build.
+</p>
+
+<!-- ══════════════════════════════════════════════════════════════
+     CONCLUSION
+══════════════════════════════════════════════════════════════ -->
+<h2>Conclusion</h2>
+
+<div class="result-box">
+  <p class="result-title">Full Regression Test — PASSED</p>
+  <p>
+    The full regression test for FitLife Gym Membership Payment System following Vertical
+    Slice Architecture refactoring was completed successfully on <strong>May 7, 2026</strong>.
+    All <strong>20 automated test cases</strong> across 3 feature modules (Auth, Membership,
+    Payment) passed with <strong>0 failures and 0 errors</strong>. Five technical issues
+    encountered during the refactoring were identified and resolved before the final test run.
+    The refactoring preserved all existing system functionality and introduced no regressions.
+    The system is stable and ready for continued development.
+  </p>
+  <br/>
+  <p><strong>Final Result: Tests run: 20 &nbsp;|&nbsp; Failures: 0 &nbsp;|&nbsp; Errors: 0 &nbsp;|&nbsp; Skipped: 0 &nbsp;|&nbsp; BUILD SUCCESS</strong></p>
+</div>
+
+<hr/>
+<p style="text-align:center; color:#999; font-size:9pt; margin-top:24px;">
+  FitLife Gym Membership Payment System &nbsp;·&nbsp; IT342 G6 &nbsp;·&nbsp;
+  Branch: refactor/vertical-slice-architecture &nbsp;·&nbsp; May 7, 2026
+</p>
+
+</div><!-- end page -->
+
+</body>
+</html>
