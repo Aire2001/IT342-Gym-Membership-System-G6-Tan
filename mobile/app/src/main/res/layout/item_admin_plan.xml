@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:elevation="2dp"
+    android:radius="14dp"
+    android:layout_marginBottom="10dp">
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="14dp">
+        <TextView android:id="@+id/tv_name" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="15sp" android:textStyle="bold" android:textColor="#111827" />
+        <TextView android:id="@+id/tv_price_duration" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="13sp" android:textColor="#6B7280" android:layout_marginTop="2dp" />
+        <TextView android:id="@+id/tv_description" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="12sp" android:textColor="#9CA3AF" android:layout_marginTop="2dp" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginTop="10dp">
+            <com.google.android.material.button.MaterialButton android:id="@+id/btn_edit" android:layout_width="0dp" android:layout_height="34dp" android:layout_weight="1" android:text="Edit" android:textSize="12sp" android:layout_marginEnd="6dp" style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+            <com.google.android.material.button.MaterialButton android:id="@+id/btn_delete" android:layout_width="0dp" android:layout_height="34dp" android:layout_weight="1" android:text="Delete" android:textSize="12sp" style="@style/Widget.MaterialComponents.Button.OutlinedButton" android:strokeColor="#DC2626" android:textColor="#DC2626" />
+        </LinearLayout>
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

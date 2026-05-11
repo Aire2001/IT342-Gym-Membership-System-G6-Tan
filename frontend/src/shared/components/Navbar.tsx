@@ -1,10 +1,18 @@
+import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../features/auth/AuthContext';
 
 const Navbar = () => {
-  const { user, logout, isAdmin } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [now, setNow] = useState(new Date());
+
+  useEffect(() => {
+    const t = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(t);
+  }, []);
 
   const handleLogout = async () => {
     await logout();
@@ -24,6 +32,7 @@ const Navbar = () => {
   if (!user) return null;
 
   return (
+    <>
     <nav className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
@@ -36,7 +45,12 @@ const Navbar = () => {
             </div>
             <div>
               <p className="text-gray-900 font-black text-lg leading-none tracking-tight">FitLife Gym</p>
-              <p className="text-gray-400 text-xs leading-none">Membership Portal</p>
+              <p className="text-blue-500 text-xs leading-none font-mono mt-0.5">
+                {now.toLocaleTimeString('en-PH', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}
+                <span className="text-gray-400 ml-1">
+                  {now.toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })}
+                </span>
+              </p>
             </div>
           </Link>
 
@@ -45,9 +59,6 @@ const Navbar = () => {
             <Link to="/dashboard" className={`pb-1 ${isActive('/dashboard')}`}>Dashboard</Link>
             <Link to="/memberships" className={`pb-1 ${isActive('/memberships')}`}>Plans</Link>
             <Link to="/payments/history" className={`pb-1 ${isActive('/payments/history')}`}>History</Link>
-            {isAdmin && (
-              <Link to="/admin" className={`pb-1 ${isActive('/admin')}`}>Admin</Link>
-            )}
           </div>
 
           {/* User + Logout */}
@@ -78,7 +89,7 @@ const Navbar = () => {
               </div>
             </Link>
             <button
-              onClick={handleLogout}
+              onClick={() => setShowLogoutConfirm(true)}
               className="px-4 py-1.5 text-sm font-semibold border border-gray-300 text-gray-600 rounded-lg hover:border-red-400 hover:text-red-500 transition-all"
             >
               Logout
@@ -87,6 +98,30 @@ const Navbar = () => {
         </div>
       </div>
     </nav>
+
+    {/* Logout confirm modal */}
+    {showLogoutConfirm && (
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[9999] px-4">
+        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-7">
+          <div className="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-7 h-7 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+            </svg>
+          </div>
+          <h2 className="text-xl font-black text-gray-900 text-center mb-1">Sign Out</h2>
+          <p className="text-gray-400 text-sm text-center mb-6">Are you sure you want to log out of FitLife Gym?</p>
+          <div className="flex gap-3">
+            <button onClick={() => setShowLogoutConfirm(false)} className="flex-1 py-3 border border-gray-300 hover:border-gray-400 text-gray-600 font-semibold rounded-xl text-sm transition-all">
+              Cancel
+            </button>
+            <button onClick={handleLogout} className="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white font-bold rounded-xl text-sm transition-all shadow-sm">
+              Yes, Logout
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   );
 };
 

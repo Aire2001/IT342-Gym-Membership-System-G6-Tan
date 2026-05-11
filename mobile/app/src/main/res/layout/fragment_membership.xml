@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F9FAFB">
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp" android:paddingBottom="4dp">
+        <TextView android:text="Membership Plans" android:textSize="22sp" android:textStyle="bold" android:textColor="#111827" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+        <TextView android:text="Choose the plan that fits your lifestyle" android:textSize="13sp" android:textColor="#6B7280" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" />
+    </LinearLayout>
+
+    <!-- Admin warning -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/card_admin_warning"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:elevation="0dp"
+        android:radius="10dp"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="8dp"
+        android:visibility="gone">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="12dp" android:background="#FEF3C7">
+            <TextView android:text="Admin accounts cannot purchase memberships." android:textSize="12sp" android:textStyle="bold" android:textColor="#92400E" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+            <TextView android:text="Use the Admin panel to manage members and plans." android:textSize="11sp" android:textColor="#92400E" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <ProgressBar
+        android:id="@+id/progress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:visibility="gone"
+        android:layout_marginTop="40dp" />
+
+    <TextView
+        android:id="@+id/tv_error"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:textColor="#DC2626"
+        android:textSize="14sp"
+        android:gravity="center"
+        android:layout_margin="20dp" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_plans"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="16dp"
+        android:clipToPadding="false" />
+
+</LinearLayout>

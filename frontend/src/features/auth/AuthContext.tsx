@@ -14,6 +14,7 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
+  googleLogin: (idToken: string) => Promise<void>;
   logout: () => Promise<void>;
   updateUser: (updates: Partial<User>) => void;
   isAdmin: boolean;
@@ -44,6 +45,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(userData);
   };
 
+  const googleLogin = async (idToken: string) => {
+    const res = await authAPI.googleLogin({ idToken });
+    const { accessToken, refreshToken, role, userId, email, firstname, lastname, profilePicture } = res.data.data;
+    localStorage.setItem('accessToken', accessToken);
+    localStorage.setItem('refreshToken', refreshToken);
+    const userData: User = { userId: userId ?? 0, email, role, firstname, lastname, profilePicture };
+    localStorage.setItem('user', JSON.stringify(userData));
+    setUser(userData);
+  };
+
   const logout = async () => {
     try { await authAPI.logout(); } catch (_) {}
     localStorage.clear();
@@ -60,7 +71,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, logout, updateUser, isAdmin: user?.role === 'ADMIN' }}>
+    <AuthContext.Provider value={{ user, isLoading, login, googleLogin, logout, updateUser, isAdmin: user?.role === 'ADMIN' }}>
       {children}
     </AuthContext.Provider>
   );

@@ -43,9 +43,16 @@ public class SecurityConfig {
                         // Allow all CORS preflight requests
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         // Public endpoints - no auth required
-                        .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers("/api/v1/auth/login").permitAll()
+                        .requestMatchers("/api/v1/auth/register").permitAll()
+                        .requestMatchers("/api/v1/auth/refresh").permitAll()
+                        .requestMatchers("/api/v1/auth/logout").permitAll()
+                        .requestMatchers("/api/v1/auth/oauth/**").permitAll()
+                        .requestMatchers("/api/v1/auth/test").permitAll()
                         .requestMatchers("/api/v1/memberships").permitAll()
                         .requestMatchers("/api/v1/memberships/**").permitAll()
+                        .requestMatchers("/api/v1/quotes/**").permitAll()
+                        .requestMatchers("/uploads/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
 
                         // Admin only endpoints

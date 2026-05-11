@@ -10,6 +10,7 @@ import edu.cit.tan.GymMembershipPaymentSystem.shared.repository.PaymentRepositor
 import edu.cit.tan.GymMembershipPaymentSystem.shared.repository.UserRepository;
 import edu.cit.tan.GymMembershipPaymentSystem.shared.repository.MembershipRepository;
 import edu.cit.tan.GymMembershipPaymentSystem.shared.repository.UserMembershipRepository;
+import edu.cit.tan.GymMembershipPaymentSystem.shared.service.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,6 +42,9 @@ public class PaymentController {
 
     @Autowired
     private UserMembershipRepository userMembershipRepository;
+
+    @Autowired
+    private EmailService emailService;
 
     // Test endpoint to check if payment controller is working
     @GetMapping("/test")
@@ -131,6 +135,12 @@ public class PaymentController {
             } else {
                 System.out.println("⏳ Membership pending payment confirmation via: " + method);
             }
+
+            // Send email notifications (non-blocking — failures are logged, not thrown)
+            emailService.sendPaymentReceipt(user, savedPayment, membership);
+            userRepository.findAll().stream()
+                    .filter(u -> "ADMIN".equalsIgnoreCase(u.getRole().name()))
+                    .forEach(admin -> emailService.sendAdminPaymentAlert(admin, user, savedPayment, membership));
 
             // Prepare response
             Map<String, Object> response = new HashMap<>();

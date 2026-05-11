@@ -1,5 +1,6 @@
 package edu.cit.tan.GymMembershipPaymentSystem.feature.auth;
 
+import edu.cit.tan.GymMembershipPaymentSystem.config.JwtUtils;
 import edu.cit.tan.GymMembershipPaymentSystem.feature.auth.AuthResponse;
 import edu.cit.tan.GymMembershipPaymentSystem.feature.auth.LoginRequest;
 import edu.cit.tan.GymMembershipPaymentSystem.feature.auth.RegisterRequest;
@@ -8,6 +9,7 @@ import edu.cit.tan.GymMembershipPaymentSystem.shared.entity.User;
 import edu.cit.tan.GymMembershipPaymentSystem.shared.entity.UserRole;
 import edu.cit.tan.GymMembershipPaymentSystem.shared.repository.AuthTokenRepository;
 import edu.cit.tan.GymMembershipPaymentSystem.shared.repository.UserRepository;
+import edu.cit.tan.GymMembershipPaymentSystem.shared.service.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -28,6 +30,12 @@ public class AuthService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private JwtUtils jwtUtils;
+
+    @Autowired
+    private EmailService emailService;
 
     public AuthResponse register(RegisterRequest request) {
         Map<String, Object> data = new HashMap<>();
@@ -61,6 +69,9 @@ public class AuthService {
             data.put("lastname", savedUser.getLastname());
             data.put("accessToken", accessToken);
             data.put("refreshToken", refreshToken);
+
+            // Send welcome email (non-blocking)
+            emailService.sendWelcomeEmail(savedUser);
 
             System.out.println("✅ User registered: " + savedUser.getEmail() + " with token stored in DB");
             return new AuthResponse(true, "Registration successful", data);
@@ -134,14 +145,14 @@ public class AuthService {
     }
 
     private String generateAndStoreToken(User user) {
-        // Generate a secure random token
-        String token = UUID.randomUUID().toString() + "-" + UUID.randomUUID().toString();
+        // Generate a signed JWT token
+        String token = jwtUtils.generateToken(user.getEmail(), user.getRole().toString());
 
-        // Store it in the database
+        // Store it in the database (enables server-side invalidation on logout)
         AuthToken authToken = new AuthToken(token, user);
         authTokenRepository.save(authToken);
 
-        System.out.println("🔑 Token generated and stored for: " + user.getEmail());
+        System.out.println("🔑 JWT generated and stored for: " + user.getEmail());
         return token;
     }
 }

@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F9FAFB">
+
+    <!-- Toolbar -->
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:elevation="4dp" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Success/Error state -->
+            <LinearLayout
+                android:id="@+id/layout_result"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:elevation="2dp"
+                    android:radius="16dp">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="32dp"
+                        android:gravity="center">
+                        <TextView
+                            android:id="@+id/tv_result_icon"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="✅"
+                            android:textSize="56sp"
+                            android:gravity="center" />
+                        <TextView
+                            android:id="@+id/tv_result_title"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="20sp"
+                            android:textStyle="bold"
+                            android:textColor="#111827"
+                            android:gravity="center"
+                            android:layout_marginTop="12dp" />
+                        <TextView
+                            android:id="@+id/tv_result_message"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="14sp"
+                            android:textColor="#6B7280"
+                            android:gravity="center"
+                            android:layout_marginTop="8dp" />
+                        <TextView
+                            android:id="@+id/tv_result_ref"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="13sp"
+                            android:textStyle="bold"
+                            android:textColor="#1D4ED8"
+                            android:background="#EFF6FF"
+                            android:padding="12dp"
+                            android:layout_marginTop="16dp"
+                            android:visibility="gone" />
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+            </LinearLayout>
+
+            <!-- Payment form -->
+            <LinearLayout
+                android:id="@+id/layout_form"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <!-- Order summary -->
+                <androidx.cardview.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:elevation="2dp"
+                    android:radius="16dp"
+                    android:layout_marginBottom="16dp">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="20dp"
+                        android:background="#EFF6FF">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="ORDER SUMMARY"
+                            android:textSize="11sp"
+                            android:textStyle="bold"
+                            android:textColor="#6B7280"
+                            android:letterSpacing="0.1"
+                            android:layout_marginBottom="12dp" />
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="6dp">
+                            <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Plan" android:textColor="#374151" android:textSize="14sp" />
+                            <TextView android:id="@+id/tv_plan_name" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#111827" android:textSize="14sp" android:textStyle="bold" />
+                        </LinearLayout>
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="12dp">
+                            <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Duration" android:textColor="#374151" android:textSize="14sp" />
+                            <TextView android:id="@+id/tv_plan_duration" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#111827" android:textSize="14sp" android:textStyle="bold" />
+                        </LinearLayout>
+                        <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#BFDBFE" android:layout_marginBottom="12dp" />
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                            <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Total" android:textColor="#111827" android:textSize="16sp" android:textStyle="bold" />
+                            <TextView android:id="@+id/tv_plan_price" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#1D4ED8" android:textSize="22sp" android:textStyle="bold" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <!-- Payment method -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Payment Method"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="#111827"
+                    android:layout_marginBottom="10dp" />
+
+                <androidx.cardview.widget.CardView android:id="@+id/card_gcash" android:layout_width="match_parent" android:layout_height="wrap_content" android:elevation="1dp" android:radius="12dp" android:layout_marginBottom="8dp">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:padding="16dp" android:gravity="center_vertical">
+                        <RadioButton android:id="@+id/rb_gcash" android:layout_width="wrap_content" android:layout_height="wrap_content" android:checked="true" android:buttonTint="#1D4ED8" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="GCash" android:textSize="15sp" android:textStyle="bold" android:layout_marginStart="12dp" />
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView android:id="@+id/card_credit" android:layout_width="match_parent" android:layout_height="wrap_content" android:elevation="1dp" android:radius="12dp" android:layout_marginBottom="8dp">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:padding="16dp" android:gravity="center_vertical">
+                        <RadioButton android:id="@+id/rb_credit" android:layout_width="wrap_content" android:layout_height="wrap_content" android:buttonTint="#1D4ED8" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Credit Card" android:textSize="15sp" android:textStyle="bold" android:layout_marginStart="12dp" />
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView android:id="@+id/card_bank" android:layout_width="match_parent" android:layout_height="wrap_content" android:elevation="1dp" android:radius="12dp" android:layout_marginBottom="20dp">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
+                            <RadioButton android:id="@+id/rb_bank" android:layout_width="wrap_content" android:layout_height="wrap_content" android:buttonTint="#1D4ED8" />
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Bank Transfer" android:textSize="15sp" android:textStyle="bold" android:layout_marginStart="12dp" />
+                        </LinearLayout>
+                        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Status will be Pending until confirmed" android:textSize="11sp" android:textColor="#6B7280" android:layout_marginStart="40dp" android:layout_marginTop="4dp" />
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_confirm"
+                    android:layout_width="match_parent"
+                    android:layout_height="54dp"
+                    android:text="Confirm Payment"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    style="@style/Widget.MaterialComponents.Button" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F9FAFB">
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp" android:paddingBottom="8dp">
+        <TextView android:text="Payment History" android:textSize="22sp" android:textStyle="bold" android:textColor="#111827" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+        <TextView android:text="All your membership payment records" android:textSize="13sp" android:textColor="#6B7280" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" />
+    </LinearLayout>
+
+    <!-- Search bar -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Search by reference, plan, method…"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="8dp">
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/et_search"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:imeOptions="actionSearch"
+            android:inputType="text" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Status filter chips -->
+    <HorizontalScrollView android:layout_width="match_parent" android:layout_height="wrap_content" android:scrollbars="none" android:layout_marginHorizontal="16dp" android:layout_marginBottom="10dp">
+        <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="horizontal">
+            <com.google.android.material.chip.Chip android:id="@+id/chip_all" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="All" android:checkable="true" android:checked="true" style="@style/Widget.MaterialComponents.Chip.Filter" android:layout_marginEnd="6dp" />
+            <com.google.android.material.chip.Chip android:id="@+id/chip_completed" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Completed" android:checkable="true" style="@style/Widget.MaterialComponents.Chip.Filter" android:layout_marginEnd="6dp" />
+            <com.google.android.material.chip.Chip android:id="@+id/chip_pending" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Pending" android:checkable="true" style="@style/Widget.MaterialComponents.Chip.Filter" android:layout_marginEnd="6dp" />
+            <com.google.android.material.chip.Chip android:id="@+id/chip_failed" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Failed" android:checkable="true" style="@style/Widget.MaterialComponents.Chip.Filter" />
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <ProgressBar android:id="@+id/progress" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center_horizontal" android:visibility="gone" android:layout_marginTop="40dp" />
+
+    <TextView android:id="@+id/tv_empty" android:layout_width="match_parent" android:layout_height="wrap_content" android:visibility="gone" android:text="No payments found." android:textColor="#9CA3AF" android:textSize="14sp" android:gravity="center" android:layout_marginTop="40dp" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_payments"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="16dp"
+        android:clipToPadding="false" />
+
+</LinearLayout>

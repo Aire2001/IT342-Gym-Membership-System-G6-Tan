@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">Gym Membership App</string>
+    <string name="app_name">FitLife Gym</string>
+    <string name="google_web_client_id">638364416506-ej3bvnc94ro26di66pjpj3civfhureau.apps.googleusercontent.com</string>
 </resources>

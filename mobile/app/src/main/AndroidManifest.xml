@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Required for API calls to backend -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
 
     <application
         android:allowBackup="true"
@@ -12,19 +13,35 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.GymMembershipApp"
         android:usesCleartextTraffic="true">
-        <!-- usesCleartextTraffic=true allows HTTP (not just HTTPS) for local dev.
-             Remove or set to false for production. -->
 
+        <!-- Login is the entry point -->
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.activities.LoginActivity"
             android:exported="true"
-            android:label="@string/app_name"
             android:theme="@style/Theme.GymMembershipApp">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".ui.activities.RegisterActivity"
+            android:exported="false"
+            android:theme="@style/Theme.GymMembershipApp" />
+
+        <!-- Main hosts BottomNavigationView + fragments -->
+        <activity
+            android:name=".ui.activities.MainActivity"
+            android:exported="false"
+            android:theme="@style/Theme.GymMembershipApp" />
+
+        <!-- Payment flow -->
+        <activity
+            android:name=".ui.activities.PaymentActivity"
+            android:exported="false"
+            android:theme="@style/Theme.GymMembershipApp" />
+
     </application>
 
 </manifest>

@@ -151,6 +151,37 @@ class AuthViewModel(
         }
     }
 
+    fun googleSignIn(idToken: String) {
+        viewModelScope.launch {
+            _authState.value = AuthState.Loading
+            try {
+                val response = apiService.googleLogin(mapOf("idToken" to idToken))
+                if (response.isSuccessful && response.body()?.success == true) {
+                    val authData = response.body()?.data
+                    val role = authData?.role ?: "USER"
+                    tokenManager.saveToken(authData?.token ?: "")
+                    tokenManager.saveEmail(authData?.email ?: "")
+                    tokenManager.saveName(authData?.firstName ?: "", authData?.lastName ?: "")
+                    tokenManager.saveRole(role)
+                    _userInfo.value = UserInfo(
+                        firstName = authData?.firstName ?: "",
+                        lastName = authData?.lastName ?: "",
+                        email = authData?.email ?: "",
+                        role = role
+                    )
+                    _authState.value = AuthState.Success("Google login successful")
+                } else {
+                    val msg = response.body()?.message ?: "Google Sign-In failed."
+                    _authState.value = AuthState.Error(msg)
+                }
+            } catch (e: Exception) {
+                _authState.value = AuthState.Error(
+                    "Cannot reach server. Make sure the backend is running."
+                )
+            }
+        }
+    }
+
     fun resetState() {
         _authState.value = AuthState.Idle
     }

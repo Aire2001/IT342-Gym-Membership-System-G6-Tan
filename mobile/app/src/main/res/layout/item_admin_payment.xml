@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:elevation="2dp"
+    android:radius="14dp"
+    android:layout_marginBottom="10dp">
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="14dp">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
+            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
+                <TextView android:id="@+id/tv_user_email" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="13sp" android:textStyle="bold" android:textColor="#111827" />
+                <TextView android:id="@+id/tv_reference" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="11sp" android:textColor="#6B7280" android:typeface="monospace" />
+                <TextView android:id="@+id/tv_plan_method" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="11sp" android:textColor="#6B7280" />
+                <TextView android:id="@+id/tv_date" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="11sp" android:textColor="#6B7280" />
+            </LinearLayout>
+            <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="end">
+                <TextView android:id="@+id/tv_amount" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="14sp" android:textStyle="bold" android:textColor="#111827" />
+                <TextView android:id="@+id/tv_status" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="11sp" android:textStyle="bold" android:paddingHorizontal="8dp" android:paddingVertical="3dp" android:layout_marginTop="4dp" />
+            </LinearLayout>
+        </LinearLayout>
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginTop="10dp">
+            <com.google.android.material.button.MaterialButton android:id="@+id/btn_edit_status" android:layout_width="0dp" android:layout_height="34dp" android:layout_weight="1" android:text="Edit Status" android:textSize="12sp" android:layout_marginEnd="6dp" style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+            <com.google.android.material.button.MaterialButton android:id="@+id/btn_delete" android:layout_width="0dp" android:layout_height="34dp" android:layout_weight="1" android:text="Delete" android:textSize="12sp" style="@style/Widget.MaterialComponents.Button.OutlinedButton" android:strokeColor="#DC2626" android:textColor="#DC2626" />
+        </LinearLayout>
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

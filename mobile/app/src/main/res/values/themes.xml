@@ -1,4 +1,10 @@
 <resources>
-    <!-- Base application theme -->
-    <style name="Theme.GymMembershipApp" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.GymMembershipApp" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">#1D4ED8</item>
+        <item name="colorPrimaryVariant">#1E40AF</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="colorSecondary">#7C3AED</item>
+        <item name="colorOnSecondary">#FFFFFF</item>
+        <item name="android:windowBackground">#F9FAFB</item>
+    </style>
 </resources>

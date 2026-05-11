@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { membershipAPI } from './membershipApi';
+import { useAuth } from '../auth/AuthContext';
 import type { MembershipPlan } from '../../shared/types';
 
 const PLAN_META: Record<string, { border: string; badge: string; btnClass: string; perks: string[] }> = {
@@ -32,6 +33,7 @@ const CheckIcon = () => (
 
 const MembershipPlans = () => {
   const navigate = useNavigate();
+  const { isAdmin } = useAuth();
   const [plans, setPlans] = useState<MembershipPlan[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -54,6 +56,30 @@ const MembershipPlans = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Admin notice */}
+        {/* Back button */}
+        <div className="mb-6">
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-2 px-5 py-2.5 border border-gray-300 hover:border-blue-500 text-gray-600 hover:text-blue-600 font-semibold rounded-xl text-sm transition-all"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7"/></svg>
+            Back
+          </button>
+        </div>
+
+        {isAdmin && (
+          <div className="mb-8 px-5 py-4 bg-amber-50 border border-amber-200 rounded-2xl flex items-start gap-3">
+            <svg className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd"/>
+            </svg>
+            <div>
+              <p className="text-sm font-bold text-amber-700">Admin accounts cannot purchase memberships.</p>
+              <p className="text-xs text-amber-600 mt-0.5">These plans are for regular members only. Use the Admin panel to manage members and plans.</p>
+            </div>
+          </div>
+        )}
+
         {/* Header */}
         <div className="text-center mb-12">
           <span className="px-3 py-1 bg-blue-100 text-blue-600 text-xs font-bold uppercase tracking-widest rounded-full">
@@ -132,10 +158,11 @@ const MembershipPlans = () => {
                   </ul>
 
                   <button
-                    onClick={() => handleSelect(plan)}
-                    disabled={selecting === plan.id}
+                    onClick={() => !isAdmin && handleSelect(plan)}
+                    disabled={selecting === plan.id || isAdmin}
+                    title={isAdmin ? 'Admins cannot purchase memberships' : ''}
                     className={`w-full py-3 rounded-xl font-bold text-sm tracking-wide transition-all
-                      ${meta.btnClass}
+                      ${isAdmin ? 'bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed' : meta.btnClass}
                       ${selecting === plan.id ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     {selecting === plan.id ? (
@@ -143,6 +170,8 @@ const MembershipPlans = () => {
                         <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
                         Selecting...
                       </span>
+                    ) : isAdmin ? (
+                      'Admin Only — Cannot Purchase'
                     ) : (
                       `Get ${plan.name}`
                     )}
@@ -157,6 +186,19 @@ const MembershipPlans = () => {
           <div className="text-center py-20 text-gray-400">
             <p className="text-lg">No membership plans available.</p>
             <p className="text-sm mt-1">Please contact the gym administrator.</p>
+          </div>
+        )}
+
+        {/* Bottom back button */}
+        {!loading && (
+          <div className="mt-10 flex justify-center">
+            <button
+              onClick={() => navigate(-1)}
+              className="flex items-center gap-2 px-5 py-2.5 border border-gray-300 hover:border-blue-500 text-gray-600 hover:text-blue-600 font-semibold rounded-xl text-sm transition-all"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7"/></svg>
+              Back
+            </button>
           </div>
         )}
       </div>

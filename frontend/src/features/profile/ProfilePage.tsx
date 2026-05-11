@@ -2,15 +2,73 @@ import React, { useState, useRef, useEffect } from 'react';
 import { profileAPI } from './profileApi';
 import { useAuth } from '../auth/AuthContext';
 
+/* ── tiny helpers ── */
+const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
+  <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm mb-5">
+    <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-5">{title}</h2>
+    {children}
+  </div>
+);
+
+const Field = ({ label, children }: { label: string; children: React.ReactNode }) => (
+  <div className="mb-4">
+    <label className="block text-sm font-semibold text-gray-700 mb-1.5">{label}</label>
+    {children}
+  </div>
+);
+
+const inputCls =
+  'w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all text-sm';
+
+const Alert = ({ type, msg }: { type: 'success' | 'error'; msg: string }) => (
+  <div
+    className={`mb-4 px-4 py-3 rounded-xl text-sm font-medium ${
+      type === 'success'
+        ? 'bg-emerald-50 border border-emerald-200 text-emerald-700'
+        : 'bg-red-50 border border-red-200 text-red-600'
+    }`}
+  >
+    {msg}
+  </div>
+);
+
+/* ── main component ── */
 const Profile = () => {
-  const { user, updateUser } = useAuth();
+  const { user, updateUser, logout } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  /* profile */
   const [form, setForm] = useState({ firstname: user?.firstname ?? '', lastname: user?.lastname ?? '' });
   const [preview, setPreview] = useState<string | null>(user?.profilePicture ?? null);
-  const [saving, setSaving] = useState(false);
-  const [success, setSuccess] = useState('');
-  const [error, setError] = useState('');
+  const [pendingPhotoFile, setPendingPhotoFile] = useState<File | null>(null);
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [profileMsg, setProfileMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  /* email */
+  const [emailForm, setEmailForm] = useState({ newEmail: '', password: '' });
+  const [showEmailForm, setShowEmailForm] = useState(false);
+  const [savingEmail, setSavingEmail] = useState(false);
+  const [emailMsg, setEmailMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  /* password */
+  const [pwForm, setPwForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+  const [showPw, setShowPw] = useState({ current: false, new: false, confirm: false });
+  const [savingPw, setSavingPw] = useState(false);
+  const [pwMsg, setPwMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [pwStrength, setPwStrength] = useState(0);
+
+  /* confirm modal */
+  const [confirmModal, setConfirmModal] = useState<{ title: string; message: string; onConfirm: () => void } | null>(null);
+
+  /* prefs */
+  const [prefs, setPrefs] = useState({
+    emailNotif: true,
+    paymentReminders: true,
+    membershipAlerts: true,
+    twoFactor: false,
+  });
+  const [prefsMsg, setPrefsMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [savingPrefs, setSavingPrefs] = useState(false);
 
   useEffect(() => {
     profileAPI.getProfile().then(res => {
@@ -18,67 +76,202 @@ const Profile = () => {
       setForm({ firstname: d.firstname ?? '', lastname: d.lastname ?? '' });
       setPreview(d.profilePicture ?? null);
     }).catch(() => {});
+    profileAPI.getPreferences().then(res => {
+      const d = res.data.data;
+      setPrefs(p => ({
+        ...p,
+        emailNotif: d.notifEmail ?? true,
+        paymentReminders: d.notifPaymentReminders ?? true,
+        membershipAlerts: d.notifMembershipAlerts ?? true,
+      }));
+    }).catch(() => {});
   }, []);
+
+  /* password strength */
+  useEffect(() => {
+    const pw = pwForm.newPassword;
+    let score = 0;
+    if (pw.length >= 6) score++;
+    if (pw.length >= 10) score++;
+    if (/[A-Z]/.test(pw)) score++;
+    if (/[0-9]/.test(pw)) score++;
+    if (/[^A-Za-z0-9]/.test(pw)) score++;
+    setPwStrength(score);
+  }, [pwForm.newPassword]);
+
+  const strengthLabel = ['', 'Weak', 'Fair', 'Good', 'Strong', 'Very Strong'][pwStrength] ?? '';
+  const strengthColor = ['', 'bg-red-400', 'bg-orange-400', 'bg-yellow-400', 'bg-blue-500', 'bg-emerald-500'][pwStrength] ?? '';
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 2 * 1024 * 1024) {
-      setError('Image must be under 2 MB.');
+    if (file.size > 10 * 1024 * 1024) {
+      setProfileMsg({ type: 'error', text: 'Image must be under 10 MB.' });
       return;
     }
-    const reader = new FileReader();
-    reader.onload = () => setPreview(reader.result as string);
-    reader.readAsDataURL(file);
-    setError('');
+    if (!file.type.startsWith('image/')) {
+      setProfileMsg({ type: 'error', text: 'Only image files are allowed.' });
+      return;
+    }
+    setProfileMsg(null);
+    setPendingPhotoFile(file);
+    // Show local preview immediately
+    setPreview(URL.createObjectURL(file));
   };
 
-  const handleSave = async (e: React.FormEvent) => {
+  const handleSaveProfile = (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.firstname.trim() || !form.lastname.trim()) {
-      setError('First name and last name are required.');
+      setProfileMsg({ type: 'error', text: 'First name and last name are required.' });
       return;
     }
-    setSaving(true);
-    setError('');
-    setSuccess('');
+    setConfirmModal({ title: 'Save Profile', message: 'Are you sure you want to update your profile information?', onConfirm: doSaveProfile });
+  };
+
+  const doSaveProfile = async () => {
+    setSavingProfile(true);
+    setProfileMsg(null);
     try {
+      let newPhotoUrl: string | undefined;
+
+      // Upload photo file first if one was selected
+      if (pendingPhotoFile) {
+        const uploadRes = await profileAPI.uploadPhoto(pendingPhotoFile);
+        newPhotoUrl = uploadRes.data?.data?.profilePicture;
+        setPendingPhotoFile(null);
+        if (newPhotoUrl) setPreview(newPhotoUrl);
+      }
+
       await profileAPI.updateProfile({
         firstname: form.firstname.trim(),
         lastname: form.lastname.trim(),
-        profilePicture: preview ?? '',
       });
-      updateUser({ firstname: form.firstname.trim(), lastname: form.lastname.trim(), profilePicture: preview ?? undefined });
-      setSuccess('Profile updated successfully!');
+      updateUser({
+        firstname: form.firstname.trim(),
+        lastname: form.lastname.trim(),
+        profilePicture: newPhotoUrl ?? preview ?? undefined,
+      });
+      setProfileMsg({ type: 'success', text: 'Profile updated successfully!' });
     } catch {
-      setError('Failed to save changes. Please try again.');
+      setProfileMsg({ type: 'error', text: 'Failed to save changes. Please try again.' });
     } finally {
-      setSaving(false);
+      setSavingProfile(false);
+    }
+  };
+
+  const handleChangeEmail = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!emailForm.newEmail.trim() || !emailForm.password.trim()) {
+      setEmailMsg({ type: 'error', text: 'All fields are required.' });
+      return;
+    }
+    setConfirmModal({ title: 'Change Email', message: 'Are you sure? You will be logged out after changing your email.', onConfirm: doChangeEmail });
+  };
+
+  const doChangeEmail = async () => {
+    setSavingEmail(true);
+    setEmailMsg(null);
+    try {
+      await profileAPI.changeEmail({ newEmail: emailForm.newEmail.trim(), password: emailForm.password });
+      updateUser({ email: emailForm.newEmail.trim() });
+      setEmailMsg({ type: 'success', text: 'Email updated! Please log in again with your new email.' });
+      setEmailForm({ newEmail: '', password: '' });
+      setShowEmailForm(false);
+      setTimeout(() => logout(), 3000);
+    } catch (err: any) {
+      const msg = err?.response?.data?.message ?? 'Failed to update email.';
+      setEmailMsg({ type: 'error', text: msg });
+    } finally {
+      setSavingEmail(false);
+    }
+  };
+
+  const handleChangePassword = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!pwForm.currentPassword || !pwForm.newPassword || !pwForm.confirmPassword) {
+      setPwMsg({ type: 'error', text: 'All password fields are required.' });
+      return;
+    }
+    if (pwForm.newPassword !== pwForm.confirmPassword) {
+      setPwMsg({ type: 'error', text: 'New passwords do not match.' });
+      return;
+    }
+    if (pwForm.newPassword.length < 6) {
+      setPwMsg({ type: 'error', text: 'New password must be at least 6 characters.' });
+      return;
+    }
+    setConfirmModal({ title: 'Change Password', message: 'Are you sure you want to change your password?', onConfirm: doChangePassword });
+  };
+
+  const doChangePassword = async () => {
+    setSavingPw(true);
+    setPwMsg(null);
+    try {
+      await profileAPI.changePassword(pwForm);
+      setPwMsg({ type: 'success', text: 'Password changed successfully!' });
+      setPwForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    } catch (err: any) {
+      const msg = err?.response?.data?.message ?? 'Failed to change password.';
+      setPwMsg({ type: 'error', text: msg });
+    } finally {
+      setSavingPw(false);
+    }
+  };
+
+  const handleSavePrefs = async () => {
+    setSavingPrefs(true);
+    try {
+      await profileAPI.savePreferences({
+        notifEmail: prefs.emailNotif,
+        notifPaymentReminders: prefs.paymentReminders,
+        notifMembershipAlerts: prefs.membershipAlerts,
+      });
+      setPrefsMsg({ type: 'success', text: 'Preferences saved! You will receive emails at ' + (user?.email ?? 'your address') + '.' });
+    } catch {
+      setPrefsMsg({ type: 'error', text: 'Failed to save preferences.' });
+    } finally {
+      setSavingPrefs(false);
+      setTimeout(() => setPrefsMsg(null), 4000);
     }
   };
 
   const initials = `${form.firstname?.[0] ?? ''}${form.lastname?.[0] ?? ''}`.toUpperCase() || user?.email?.[0]?.toUpperCase() || '?';
 
+  const EyeIcon = ({ visible }: { visible: boolean }) => (
+    <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      {visible ? (
+        <><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></>
+      ) : (
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.477 0-8.268-2.943-9.542-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"/>
+      )}
+    </svg>
+  );
+
+  const Toggle = ({ checked, onChange }: { checked: boolean; onChange: () => void }) => (
+    <button
+      type="button"
+      onClick={onChange}
+      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${checked ? 'bg-blue-600' : 'bg-gray-200'}`}
+    >
+      <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${checked ? 'translate-x-6' : 'translate-x-1'}`} />
+    </button>
+  );
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-10">
         <div className="mb-8">
-          <h1 className="text-3xl font-black text-gray-900 tracking-tight">Profile Settings</h1>
-          <p className="text-gray-400 text-sm mt-1">Update your name and profile picture.</p>
+          <h1 className="text-3xl font-black text-gray-900 tracking-tight">Account Settings</h1>
+          <p className="text-gray-400 text-sm mt-1">Manage your profile, security, and preferences.</p>
         </div>
 
-        <form onSubmit={handleSave}>
-          {/* Profile Picture */}
-          <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm mb-5">
-            <h2 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-5">Profile Picture</h2>
+        {/* ── Profile Picture & Name ── */}
+        <form onSubmit={handleSaveProfile}>
+          <Section title="Profile Picture">
             <div className="flex items-center gap-6">
               <div className="relative">
                 {preview ? (
-                  <img
-                    src={preview}
-                    alt="Profile"
-                    className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-md"
-                  />
+                  <img src={preview} alt="Profile" className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-md" />
                 ) : (
                   <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white text-3xl font-black shadow-md border-4 border-white">
                     {initials}
@@ -94,95 +287,220 @@ const Profile = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
                   </svg>
                 </button>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  className="hidden"
-                />
+                <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
               </div>
               <div>
-                <p className="text-gray-700 font-semibold text-sm">
-                  {form.firstname || user?.firstname} {form.lastname || user?.lastname}
-                </p>
+                <p className="text-gray-700 font-semibold text-sm">{form.firstname || user?.firstname} {form.lastname || user?.lastname}</p>
                 <p className="text-gray-400 text-xs mt-0.5">{user?.email}</p>
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="mt-3 px-4 py-1.5 border border-gray-300 text-gray-600 hover:border-blue-500 hover:text-blue-600 rounded-lg text-xs font-semibold transition-all"
-                >
-                  Change Photo
-                </button>
-                {preview && (
-                  <button
-                    type="button"
-                    onClick={() => { setPreview(null); if (fileInputRef.current) fileInputRef.current.value = ''; }}
-                    className="mt-3 ml-2 px-4 py-1.5 border border-gray-300 text-red-500 hover:border-red-400 rounded-lg text-xs font-semibold transition-all"
-                  >
-                    Remove
+                <div className="flex gap-2 mt-3">
+                  <button type="button" onClick={() => fileInputRef.current?.click()} className="px-4 py-1.5 border border-gray-300 text-gray-600 hover:border-blue-500 hover:text-blue-600 rounded-lg text-xs font-semibold transition-all">
+                    Change Photo
                   </button>
-                )}
+                  {preview && (
+                    <button type="button" onClick={() => { setPreview(null); if (fileInputRef.current) fileInputRef.current.value = ''; }} className="px-4 py-1.5 border border-gray-300 text-red-500 hover:border-red-400 rounded-lg text-xs font-semibold transition-all">
+                      Remove
+                    </button>
+                  )}
+                </div>
                 <p className="text-gray-400 text-xs mt-2">JPG, PNG or GIF · Max 2 MB</p>
               </div>
             </div>
-          </div>
+          </Section>
 
-          {/* Name Fields */}
-          <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm mb-5">
-            <h2 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-5">Personal Information</h2>
+          <Section title="Personal Information">
             <div className="grid grid-cols-2 gap-4 mb-4">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">First Name</label>
-                <input
-                  type="text"
-                  value={form.firstname}
-                  onChange={e => setForm({ ...form, firstname: e.target.value })}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Last Name</label>
-                <input
-                  type="text"
-                  value={form.lastname}
-                  onChange={e => setForm({ ...form, lastname: e.target.value })}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all text-sm"
-                />
-              </div>
+              <Field label="First Name">
+                <input type="text" value={form.firstname} onChange={e => setForm({ ...form, firstname: e.target.value })} className={inputCls} />
+              </Field>
+              <Field label="Last Name">
+                <input type="text" value={form.lastname} onChange={e => setForm({ ...form, lastname: e.target.value })} className={inputCls} />
+              </Field>
             </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Email Address</label>
-              <input
-                type="email"
-                value={user?.email ?? ''}
-                disabled
-                className="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-xl text-gray-400 text-sm cursor-not-allowed"
-              />
-              <p className="text-xs text-gray-400 mt-1">Email cannot be changed.</p>
-            </div>
-          </div>
 
-          {error && (
-            <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
-              {error}
-            </div>
-          )}
-          {success && (
-            <div className="mb-4 px-4 py-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-700 text-sm font-medium">
-              {success}
-            </div>
-          )}
+            {/* Email */}
+            <Field label="Email Address">
+              <div className="flex items-center gap-3">
+                <input type="email" value={user?.email ?? ''} disabled className="flex-1 px-4 py-3 bg-gray-100 border border-gray-200 rounded-xl text-gray-500 text-sm cursor-not-allowed" />
+                <button type="button" onClick={() => { setShowEmailForm(v => !v); setEmailMsg(null); }} className="px-4 py-3 bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-600 rounded-xl text-xs font-bold transition-all whitespace-nowrap">
+                  {showEmailForm ? 'Cancel' : 'Change Email'}
+                </button>
+              </div>
+            </Field>
 
-          <button
-            type="submit"
-            disabled={saving}
-            className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-bold rounded-xl transition-all text-sm shadow-sm"
-          >
-            {saving ? 'Saving...' : 'Save Changes'}
+            {showEmailForm && (
+              <div className="mt-1 p-4 bg-blue-50 border border-blue-100 rounded-xl">
+                <p className="text-xs text-blue-700 font-semibold mb-3">You will be logged out after changing your email.</p>
+                {emailMsg && <Alert type={emailMsg.type} msg={emailMsg.text} />}
+                <form onSubmit={handleChangeEmail} className="space-y-3">
+                  <Field label="New Email Address">
+                    <input type="email" value={emailForm.newEmail} onChange={e => setEmailForm({ ...emailForm, newEmail: e.target.value })} placeholder="newaddress@example.com" className={inputCls} />
+                  </Field>
+                  <Field label="Confirm with Password">
+                    <input type="password" value={emailForm.password} onChange={e => setEmailForm({ ...emailForm, password: e.target.value })} placeholder="Your current password" className={inputCls} />
+                  </Field>
+                  <button type="submit" disabled={savingEmail} className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-bold rounded-xl text-sm transition-all">
+                    {savingEmail ? 'Saving…' : 'Update Email'}
+                  </button>
+                </form>
+              </div>
+            )}
+          </Section>
+
+          {profileMsg && <Alert type={profileMsg.type} msg={profileMsg.text} />}
+          <button type="submit" disabled={savingProfile} className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-bold rounded-xl transition-all text-sm shadow-sm mb-5">
+            {savingProfile ? 'Saving…' : 'Save Profile'}
           </button>
         </form>
+
+        {/* ── Change Password ── */}
+        <Section title="Change Password">
+          <form onSubmit={handleChangePassword} className="space-y-1">
+            {pwMsg && <Alert type={pwMsg.type} msg={pwMsg.text} />}
+
+            <Field label="Current Password">
+              <div className="relative">
+                <input type={showPw.current ? 'text' : 'password'} value={pwForm.currentPassword} onChange={e => setPwForm({ ...pwForm, currentPassword: e.target.value })} placeholder="Enter current password" className={inputCls + ' pr-10'} />
+                <button type="button" onClick={() => setShowPw(p => ({ ...p, current: !p.current }))} className="absolute right-3 top-1/2 -translate-y-1/2">
+                  <EyeIcon visible={showPw.current} />
+                </button>
+              </div>
+            </Field>
+
+            <Field label="New Password">
+              <div className="relative">
+                <input type={showPw.new ? 'text' : 'password'} value={pwForm.newPassword} onChange={e => setPwForm({ ...pwForm, newPassword: e.target.value })} placeholder="At least 6 characters" className={inputCls + ' pr-10'} />
+                <button type="button" onClick={() => setShowPw(p => ({ ...p, new: !p.new }))} className="absolute right-3 top-1/2 -translate-y-1/2">
+                  <EyeIcon visible={showPw.new} />
+                </button>
+              </div>
+              {pwForm.newPassword && (
+                <div className="mt-2">
+                  <div className="flex gap-1 mb-1">
+                    {[1,2,3,4,5].map(i => (
+                      <div key={i} className={`h-1.5 flex-1 rounded-full transition-colors ${i <= pwStrength ? strengthColor : 'bg-gray-200'}`} />
+                    ))}
+                  </div>
+                  <p className="text-xs text-gray-500">Strength: <span className="font-semibold">{strengthLabel}</span></p>
+                </div>
+              )}
+            </Field>
+
+            <Field label="Confirm New Password">
+              <div className="relative">
+                <input type={showPw.confirm ? 'text' : 'password'} value={pwForm.confirmPassword} onChange={e => setPwForm({ ...pwForm, confirmPassword: e.target.value })} placeholder="Re-enter new password" className={inputCls + ' pr-10'} />
+                <button type="button" onClick={() => setShowPw(p => ({ ...p, confirm: !p.confirm }))} className="absolute right-3 top-1/2 -translate-y-1/2">
+                  <EyeIcon visible={showPw.confirm} />
+                </button>
+              </div>
+              {pwForm.confirmPassword && pwForm.newPassword !== pwForm.confirmPassword && (
+                <p className="text-xs text-red-500 mt-1">Passwords do not match</p>
+              )}
+            </Field>
+
+            <button type="submit" disabled={savingPw} className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white font-bold rounded-xl transition-all text-sm mt-2">
+              {savingPw ? 'Updating…' : 'Update Password'}
+            </button>
+          </form>
+        </Section>
+
+        {/* ── Notification Preferences ── */}
+        <Section title="Notification Preferences">
+          {prefsMsg && <Alert type={prefsMsg.type} msg={prefsMsg.text} />}
+          <div className="space-y-4">
+            {([
+              { key: 'emailNotif', label: 'Email Notifications', desc: 'Receive updates and announcements via email' },
+              { key: 'paymentReminders', label: 'Payment Reminders', desc: 'Get reminders before your membership renews' },
+              { key: 'membershipAlerts', label: 'Membership Alerts', desc: 'Notifications when your membership expires or changes' },
+            ] as const).map(({ key, label, desc }) => (
+              <div key={key} className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-gray-800">{label}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">{desc}</p>
+                </div>
+                <Toggle checked={prefs[key]} onChange={() => setPrefs(p => ({ ...p, [key]: !p[key] }))} />
+              </div>
+            ))}
+          </div>
+          <button type="button" onClick={handleSavePrefs} disabled={savingPrefs} className="mt-5 w-full py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-bold rounded-xl text-sm transition-all">
+            {savingPrefs ? 'Saving…' : 'Save Preferences'}
+          </button>
+        </Section>
+
+        {/* ── Security ── */}
+        <Section title="Security">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-semibold text-gray-800">Two-Factor Authentication</p>
+                <p className="text-xs text-gray-400 mt-0.5">Add an extra layer of security to your account</p>
+              </div>
+              <Toggle checked={prefs.twoFactor} onChange={() => setPrefs(p => ({ ...p, twoFactor: !p.twoFactor }))} />
+            </div>
+            <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+              <div>
+                <p className="text-sm font-semibold text-gray-800">Active Sessions</p>
+                <p className="text-xs text-gray-400 mt-0.5">You are logged in on 1 device</p>
+              </div>
+              <button type="button" onClick={() => setConfirmModal({ title: 'Sign Out All', message: 'Are you sure you want to sign out of all devices?', onConfirm: () => logout() })} className="px-4 py-2 border border-red-200 text-red-500 hover:bg-red-50 rounded-xl text-xs font-bold transition-all">
+                Sign Out All
+              </button>
+            </div>
+          </div>
+        </Section>
+
+        {/* ── Account Info ── */}
+        <Section title="Account Information">
+          <div className="space-y-3">
+            {[
+              { label: 'Account ID', value: `#${user?.userId ?? '—'}` },
+              { label: 'Role', value: user?.role ?? '—' },
+              { label: 'Email', value: user?.email ?? '—' },
+            ].map(({ label, value }) => (
+              <div key={label} className="flex justify-between items-center py-2 border-b border-gray-50 last:border-0">
+                <span className="text-sm text-gray-500">{label}</span>
+                <span className="text-sm font-semibold text-gray-800">{value}</span>
+              </div>
+            ))}
+          </div>
+        </Section>
+
+        {/* ── Danger Zone ── */}
+        <div className="bg-white border border-red-100 rounded-2xl p-6 shadow-sm mb-5">
+          <h2 className="text-xs font-bold text-red-400 uppercase tracking-widest mb-4">Danger Zone</h2>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-semibold text-gray-800">Sign Out</p>
+              <p className="text-xs text-gray-400 mt-0.5">Log out of your account on this device</p>
+            </div>
+            <button type="button" onClick={() => setConfirmModal({ title: 'Sign Out', message: 'Are you sure you want to log out of FitLife Gym?', onConfirm: () => logout() })} className="px-5 py-2 bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 rounded-xl text-sm font-bold transition-all">
+              Logout
+            </button>
+          </div>
+        </div>
       </div>
+
+      {/* Confirm modal */}
+      {confirmModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-7">
+            <div className="w-14 h-14 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </div>
+            <h2 className="text-xl font-black text-gray-900 text-center mb-1">{confirmModal.title}</h2>
+            <p className="text-gray-400 text-sm text-center mb-6">{confirmModal.message}</p>
+            <div className="flex gap-3">
+              <button onClick={() => setConfirmModal(null)} className="flex-1 py-3 border border-gray-300 hover:border-gray-400 text-gray-600 font-semibold rounded-xl text-sm transition-all">
+                Cancel
+              </button>
+              <button onClick={() => { confirmModal.onConfirm(); setConfirmModal(null); }} className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-sm transition-all shadow-sm">
+                Yes, Continue
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

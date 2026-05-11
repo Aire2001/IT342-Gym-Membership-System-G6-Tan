@@ -115,6 +115,8 @@ public class AdminController {
             if (user == null) {
                 return ApiResponse.error("DB-001", "User not found with id: " + id, null);
             }
+            List<Payment> userPayments = paymentRepository.findByUserId(id);
+            paymentRepository.deleteAll(userPayments);
             userRepository.delete(user);
             return ApiResponse.success("User deleted successfully");
         } catch (Exception e) {

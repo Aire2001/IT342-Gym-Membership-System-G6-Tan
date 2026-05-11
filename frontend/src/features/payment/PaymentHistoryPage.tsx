@@ -22,7 +22,7 @@ const StatusBadge = ({ status }: { status: string }) => {
 
 const downloadReceipt = (p: Payment) => {
   const date = p.paymentDate
-    ? new Date(p.paymentDate).toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' })
+    ? new Date(p.paymentDate).toLocaleString('en-PH', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true })
     : '—';
   const amount = `₱${p.amount?.toLocaleString('en-PH', { minimumFractionDigits: 2 })}`;
   const status = normalizeStatus(p.paymentStatus);
@@ -132,9 +132,18 @@ const PaymentHistory = () => {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-black text-gray-900 tracking-tight">Payment History</h1>
-            <p className="text-gray-400 text-sm mt-1">All your membership payment records</p>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => navigate(-1)}
+              className="flex items-center gap-1.5 px-4 py-2 border border-gray-300 hover:border-blue-500 text-gray-600 hover:text-blue-600 font-semibold rounded-xl text-sm transition-all"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7"/></svg>
+              Back
+            </button>
+            <div>
+              <h1 className="text-3xl font-black text-gray-900 tracking-tight">Payment History</h1>
+              <p className="text-gray-400 text-sm mt-1">All your membership payment records</p>
+            </div>
           </div>
           <button
             onClick={() => navigate('/memberships')}
@@ -147,23 +156,23 @@ const PaymentHistory = () => {
         {/* Summary */}
         {payments.length > 0 && (
           <div className="grid grid-cols-3 gap-4 mb-6">
-            <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm overflow-hidden relative">
+            <button onClick={() => setStatusFilter('All')} className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm overflow-hidden relative text-left hover:shadow-md hover:border-blue-300 transition-all group">
               <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-blue-400" />
-              <p className="text-gray-400 text-xs uppercase tracking-widest mb-1 mt-1">Total Payments</p>
+              <p className="text-gray-400 text-xs uppercase tracking-widest mb-1 mt-1 group-hover:text-gray-600 transition-colors">Total Payments</p>
               <p className="text-2xl font-black text-gray-900">{payments.length}</p>
-            </div>
-            <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm overflow-hidden relative">
+            </button>
+            <button onClick={() => setStatusFilter('Completed')} className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm overflow-hidden relative text-left hover:shadow-md hover:border-purple-300 transition-all group">
               <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 to-indigo-500" />
-              <p className="text-gray-400 text-xs uppercase tracking-widest mb-1 mt-1">Total Paid</p>
+              <p className="text-gray-400 text-xs uppercase tracking-widest mb-1 mt-1 group-hover:text-gray-600 transition-colors">Total Paid</p>
               <p className="text-2xl font-black text-purple-600">₱{totalPaid.toLocaleString('en-PH')}</p>
-            </div>
-            <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm overflow-hidden relative">
+            </button>
+            <button onClick={() => setStatusFilter('Completed')} className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm overflow-hidden relative text-left hover:shadow-md hover:border-emerald-300 transition-all group">
               <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-400" />
-              <p className="text-gray-400 text-xs uppercase tracking-widest mb-1 mt-1">Completed</p>
+              <p className="text-gray-400 text-xs uppercase tracking-widest mb-1 mt-1 group-hover:text-gray-600 transition-colors">Completed</p>
               <p className="text-2xl font-black text-emerald-600">
                 {payments.filter(p => p.paymentStatus?.toUpperCase() === 'COMPLETED').length}
               </p>
-            </div>
+            </button>
           </div>
         )}
 
@@ -233,15 +242,20 @@ const PaymentHistory = () => {
                   ) : filtered.map((p, idx) => (
                     <tr
                       key={p.paymentId}
-                      className={`hover:bg-gray-50 transition-colors ${idx < filtered.length - 1 ? 'border-b border-gray-100' : ''}`}
+                      onClick={() => downloadReceipt(p)}
+                      title="Click to view receipt"
+                      className={`hover:bg-blue-50 cursor-pointer transition-colors ${idx < filtered.length - 1 ? 'border-b border-gray-100' : ''}`}
                     >
                       <td className="px-6 py-4 font-mono text-sm text-gray-600">{p.paymentReference}</td>
                       <td className="px-6 py-4 text-sm text-gray-900 font-medium">{p.membershipName || '—'}</td>
                       <td className="px-6 py-4 text-sm text-gray-500">{p.paymentMethod}</td>
                       <td className="px-6 py-4 text-sm text-gray-400">
-                        {p.paymentDate
-                          ? new Date(p.paymentDate).toLocaleDateString('en-PH', { year: 'numeric', month: 'short', day: 'numeric' })
-                          : '—'}
+                        {p.paymentDate ? (
+                          <div>
+                            <p>{new Date(p.paymentDate).toLocaleDateString('en-PH', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
+                            <p className="text-xs text-gray-400">{new Date(p.paymentDate).toLocaleTimeString('en-PH', { hour: '2-digit', minute: '2-digit', hour12: true })}</p>
+                          </div>
+                        ) : '—'}
                       </td>
                       <td className="px-6 py-4 text-right font-semibold text-gray-900">
                         ₱{p.amount?.toLocaleString('en-PH')}
@@ -271,6 +285,15 @@ const PaymentHistory = () => {
                 Showing {filtered.length} of {payments.length} record{payments.length !== 1 ? 's' : ''}
               </p>
             )}
+            <div className="mt-4">
+              <button
+                onClick={() => navigate(-1)}
+                className="flex items-center gap-2 px-5 py-2.5 border border-gray-300 hover:border-blue-500 text-gray-600 hover:text-blue-600 font-semibold rounded-xl text-sm transition-all"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7"/></svg>
+                Back
+              </button>
+            </div>
           </>
         )}
 

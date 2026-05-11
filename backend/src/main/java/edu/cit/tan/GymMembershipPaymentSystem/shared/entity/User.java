@@ -42,6 +42,15 @@ public class User implements UserDetails {
     @Column(name = "profile_picture", columnDefinition = "LONGTEXT")
     private String profilePicture;
 
+    @Column(name = "notif_email", nullable = false, columnDefinition = "BOOLEAN DEFAULT TRUE")
+    private boolean notifEmail = true;
+
+    @Column(name = "notif_payment_reminders", nullable = false, columnDefinition = "BOOLEAN DEFAULT TRUE")
+    private boolean notifPaymentReminders = true;
+
+    @Column(name = "notif_membership_alerts", nullable = false, columnDefinition = "BOOLEAN DEFAULT TRUE")
+    private boolean notifMembershipAlerts = true;
+
     public User() {
     }
 
@@ -167,6 +176,15 @@ public class User implements UserDetails {
 
     public String getProfilePicture() { return profilePicture; }
     public void setProfilePicture(String profilePicture) { this.profilePicture = profilePicture; }
+
+    public boolean isNotifEmail() { return notifEmail; }
+    public void setNotifEmail(boolean notifEmail) { this.notifEmail = notifEmail; }
+
+    public boolean isNotifPaymentReminders() { return notifPaymentReminders; }
+    public void setNotifPaymentReminders(boolean notifPaymentReminders) { this.notifPaymentReminders = notifPaymentReminders; }
+
+    public boolean isNotifMembershipAlerts() { return notifMembershipAlerts; }
+    public void setNotifMembershipAlerts(boolean notifMembershipAlerts) { this.notifMembershipAlerts = notifMembershipAlerts; }
 
     @PrePersist
     protected void onCreate() {
