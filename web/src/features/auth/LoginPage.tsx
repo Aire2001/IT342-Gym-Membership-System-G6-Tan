@@ -1,14 +1,25 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import { useAuth } from './AuthContext';
 
 const Login = () => {
   const { login, googleLogin } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
+  const [info, setInfo] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get('reason') === 'session_expired') {
+      setInfo('Your admin session expired. Please log in again.');
+    }
+  }, [location.search]);
+
+  useEffect(() => { if (!error) return; const t = setTimeout(() => setError(''), 3000); return () => clearTimeout(t); }, [error]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -26,7 +37,7 @@ const Login = () => {
       await login(form.email, form.password);
       navigate('/dashboard');
     } catch (err: any) {
-      const msg = err.response?.data?.error?.message || 'Invalid credentials. Please try again.';
+      const msg = err.response?.data?.error?.message || (err.code === 'ERR_NETWORK' ? 'Server is offline. Please try again.' : 'Invalid credentials. Please try again.');
       setError(msg);
     } finally {
       setLoading(false);
@@ -71,6 +82,12 @@ const Login = () => {
           <h2 className="text-xl font-bold text-gray-900 mb-1">Sign in to your account</h2>
           <p className="text-gray-400 text-sm mb-6">Welcome back! Enter your credentials.</p>
 
+          {info && (
+            <div className="mb-4 px-4 py-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-700 text-sm font-medium">
+              {info}
+            </div>
+          )}
+
           {error && (
             <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
               {error}
@@ -91,7 +108,12 @@ const Login = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Password</label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-sm font-semibold text-gray-700">Password</label>
+                <Link to="/forgot-password" className="text-xs text-blue-600 hover:text-blue-700 font-medium">
+                  Forgot password?
+                </Link>
+              </div>
               <input
                 type="password"
                 name="password"

@@ -73,6 +73,7 @@ class PaymentHistoryFragment : Fragment() {
                         binding.progress.visibility = View.GONE
                         binding.tvEmpty.text = state.message
                         binding.tvEmpty.visibility = View.VISIBLE
+                        binding.tvEmpty.postDelayed({ binding.tvEmpty.visibility = View.GONE }, 3000)
                     }
                     else -> {}
                 }

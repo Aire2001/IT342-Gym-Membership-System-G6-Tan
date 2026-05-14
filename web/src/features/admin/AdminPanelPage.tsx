@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { adminAPI } from './adminApi';
 import { membershipAPI, membershipAdminAPI } from '../membership/membershipApi';
 import { useAuth } from '../auth/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 type Tab = 'dashboard' | 'users' | 'payments' | 'memberships';
 
@@ -38,11 +38,18 @@ const ConfirmDialog = ({ message, onConfirm, onCancel, confirmLabel = 'Delete', 
 const AdminPanel = () => {
   const { isAdmin } = useAuth();
   const navigate = useNavigate();
-  const [tab, setTab] = useState<Tab>('dashboard');
+  const location = useLocation();
+  const [tab, setTab] = useState<Tab>(() => {
+    const params = new URLSearchParams(location.search);
+    const t = params.get('tab');
+    if (t === 'users' || t === 'payments' || t === 'memberships') return t;
+    return 'dashboard';
+  });
   const [users, setUsers] = useState<any[]>([]);
   const [payments, setPayments] = useState<any[]>([]);
   const [memberships, setMemberships] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
   const [confirm, setConfirm] = useState<{ message: string; onConfirm: () => void; confirmLabel?: string; confirmColor?: string } | null>(null);
   const [toast, setToast] = useState('');
 
@@ -82,11 +89,26 @@ const AdminPanel = () => {
 
   const load = () => {
     setLoading(true);
+    setLoadError('');
     Promise.all([adminAPI.getUsers(), adminAPI.getPayments(), membershipAPI.getPlans()])
       .then(([u, p, m]) => {
         setUsers(u.data.data || []);
         setPayments(p.data.data || []);
         setMemberships(m.data.data || []);
+      })
+      .catch((err) => {
+        const status = err.response?.status;
+        if (status === 403) {
+          setLoadError('Access denied (403). Please log out and log back in as an admin account.');
+        } else if (status === 401) {
+          setLoadError('Session expired. Please log in again.');
+        } else {
+          setLoadError(
+            err.response?.data?.error?.message ||
+            err.response?.data?.message ||
+            'Failed to load admin data. Click Retry to try again.'
+          );
+        }
       })
       .finally(() => setLoading(false));
   };
@@ -302,6 +324,18 @@ const AdminPanel = () => {
           </div>
         )}
 
+        {!loading && loadError && (
+          <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3 min-w-0">
+              <svg className="w-5 h-5 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+              <p className="text-red-700 text-sm font-semibold truncate">{loadError}</p>
+            </div>
+            <button onClick={load} className="px-4 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-bold rounded-lg transition-all flex-shrink-0">
+              Retry
+            </button>
+          </div>
+        )}
+
         {/* ── Dashboard Tab ── */}
         {!loading && tab === 'dashboard' && (() => {
           const totalRevenue = payments
@@ -428,7 +462,10 @@ const AdminPanel = () => {
                   ) : (
                     <div className="divide-y divide-gray-50">
                       {recentPayments.map((p: any) => (
-                        <button key={p.paymentId} onClick={() => { setTab('payments'); setHighlightPaymentId(p.paymentId); }} className="w-full px-6 py-3.5 flex items-center justify-between hover:bg-blue-50 transition-colors text-left">
+                        <button key={p.paymentId} onClick={() => {
+                          const found = users.find((u: any) => u.email === p.userEmail) || { email: p.userEmail, firstname: '', lastname: '', role: 'USER', id: null, createdAt: null };
+                          setViewUser(found);
+                        }} className="w-full px-6 py-3.5 flex items-center justify-between hover:bg-blue-50 transition-colors text-left">
                           <div className="min-w-0">
                             <p className="text-sm font-semibold text-gray-800 truncate group-hover:text-blue-600">{p.userEmail}</p>
                             <p className="text-xs text-gray-400">{p.membershipName || '—'} · {p.paymentDate?.slice(0, 10) ?? '—'}</p>
@@ -456,7 +493,7 @@ const AdminPanel = () => {
                       {recentUsers.map((u: any) => {
                         const initials = `${u.firstname?.[0] ?? ''}${u.lastname?.[0] ?? ''}`.toUpperCase() || '?';
                         return (
-                          <button key={u.id} onClick={() => { setTab('users'); setHighlightUserId(u.id); }} className="w-full px-6 py-3.5 flex items-center gap-3 hover:bg-blue-50 transition-colors text-left">
+                          <button key={u.id} onClick={() => setViewUser(u)} className="w-full px-6 py-3.5 flex items-center gap-3 hover:bg-blue-50 transition-colors text-left">
                             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white text-xs font-black flex-shrink-0">
                               {initials}
                             </div>
@@ -583,7 +620,15 @@ const AdminPanel = () => {
                 ))}
               </tbody>
             </table>
-            {users.length === 0 && <p className="text-center text-gray-400 py-10 text-sm">No users found.</p>}
+            {sortedUsers.length === 0 && (
+              <div className="text-center py-14">
+                <svg className="w-10 h-10 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                <p className="text-gray-400 text-sm font-medium">
+                  {userSearch ? `No users matching "${userSearch}"` : 'No users found.'}
+                </p>
+                {userSearch && <button onClick={() => setUserSearch('')} className="mt-2 text-xs text-blue-600 hover:underline font-semibold">Clear search</button>}
+              </div>
+            )}
           </div>
           <div className="mt-4">
             <button
@@ -699,7 +744,19 @@ const AdminPanel = () => {
                 ))}
               </tbody>
             </table>
-            {payments.length === 0 && <p className="text-center text-gray-400 py-10 text-sm">No payments found.</p>}
+            {sortedPayments.length === 0 && (
+              <div className="text-center py-14">
+                <svg className="w-10 h-10 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                <p className="text-gray-400 text-sm font-medium">
+                  {paymentSearch || paymentStatusFilter !== 'All'
+                    ? `No payments matching your filters`
+                    : 'No payments found.'}
+                </p>
+                {(paymentSearch || paymentStatusFilter !== 'All') && (
+                  <button onClick={() => { setPaymentSearch(''); setPaymentStatusFilter('All'); }} className="mt-2 text-xs text-blue-600 hover:underline font-semibold">Clear filters</button>
+                )}
+              </div>
+            )}
           </div>
           <div className="mt-4">
             <button

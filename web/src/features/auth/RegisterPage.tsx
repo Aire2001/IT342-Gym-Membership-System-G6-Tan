@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { authAPI } from './authApi';
 
@@ -42,6 +42,8 @@ const Register = () => {
   const [apiError, setApiError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => { if (!apiError) return; const t = setTimeout(() => setApiError(''), 3000); return () => clearTimeout(t); }, [apiError]);
+
   const validate = () => {
     const e: Record<string, string> = {};
     if (!form.firstname.trim()) e.firstname = 'First name is required.';
@@ -71,7 +73,7 @@ const Register = () => {
       await authAPI.register(form);
       navigate('/login', { state: { registered: true } });
     } catch (err: any) {
-      const msg = err.response?.data?.error?.message || 'Registration failed. Try again.';
+      const msg = err.response?.data?.error?.message || (err.code === 'ERR_NETWORK' ? 'Server is offline. Please try again.' : 'Registration failed. Try again.');
       setApiError(msg);
     } finally {
       setLoading(false);

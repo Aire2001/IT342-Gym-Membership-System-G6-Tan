@@ -16,6 +16,17 @@ Frontend/node_modules/
 Frontend/dist/
 Frontend/.env
 Frontend/.env.local
+web/node_modules/
+web/dist/
+web/.env
+web/.env.local
+
+# Claude Code session data
+.claude/
+
+# Runtime artifacts
+backend/backend.pid
+backend/uploads/
 
 # Java / Maven
 backend/target/

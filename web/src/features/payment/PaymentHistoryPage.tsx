@@ -103,6 +103,8 @@ const PaymentHistory = () => {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
 
+  useEffect(() => { if (!error) return; const t = setTimeout(() => setError(''), 3000); return () => clearTimeout(t); }, [error]);
+
   useEffect(() => {
     paymentAPI.getHistory()
       .then(res => setPayments(res.data.data || []))

@@ -70,6 +70,11 @@ const Profile = () => {
   const [prefsMsg, setPrefsMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [savingPrefs, setSavingPrefs] = useState(false);
 
+  useEffect(() => { if (!profileMsg) return; const t = setTimeout(() => setProfileMsg(null), 3000); return () => clearTimeout(t); }, [profileMsg]);
+  useEffect(() => { if (!emailMsg) return; const t = setTimeout(() => setEmailMsg(null), 3000); return () => clearTimeout(t); }, [emailMsg]);
+  useEffect(() => { if (!pwMsg) return; const t = setTimeout(() => setPwMsg(null), 3000); return () => clearTimeout(t); }, [pwMsg]);
+  useEffect(() => { if (!prefsMsg) return; const t = setTimeout(() => setPrefsMsg(null), 3000); return () => clearTimeout(t); }, [prefsMsg]);
+
   useEffect(() => {
     profileAPI.getProfile().then(res => {
       const d = res.data.data;
@@ -231,7 +236,6 @@ const Profile = () => {
       setPrefsMsg({ type: 'error', text: 'Failed to save preferences.' });
     } finally {
       setSavingPrefs(false);
-      setTimeout(() => setPrefsMsg(null), 4000);
     }
   };
 

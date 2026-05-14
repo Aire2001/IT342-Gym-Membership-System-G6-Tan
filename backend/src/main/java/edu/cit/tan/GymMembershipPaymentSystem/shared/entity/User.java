@@ -51,6 +51,17 @@ public class User implements UserDetails {
     @Column(name = "notif_membership_alerts", nullable = false, columnDefinition = "BOOLEAN DEFAULT TRUE")
     private boolean notifMembershipAlerts = true;
 
+    @Column(name = "reset_token")
+    private String resetToken;
+
+    @Column(name = "reset_token_expiry")
+    private LocalDateTime resetTokenExpiry;
+
+    public String getResetToken() { return resetToken; }
+    public void setResetToken(String resetToken) { this.resetToken = resetToken; }
+    public LocalDateTime getResetTokenExpiry() { return resetTokenExpiry; }
+    public void setResetTokenExpiry(LocalDateTime resetTokenExpiry) { this.resetTokenExpiry = resetTokenExpiry; }
+
     public User() {
     }
 

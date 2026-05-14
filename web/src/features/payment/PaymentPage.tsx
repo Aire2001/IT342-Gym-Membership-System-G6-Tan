@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { paymentAPI } from './paymentApi';
 import { useAuth } from '../auth/AuthContext';
@@ -45,6 +45,8 @@ const PaymentPage = () => {
     paymentStatus: string;
   } | null>(null);
 
+  useEffect(() => { if (!error) return; const t = setTimeout(() => setError(''), 3000); return () => clearTimeout(t); }, [error]);
+
   if (!plan) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -69,6 +71,18 @@ const PaymentPage = () => {
     setLoading(true);
     setError('');
     try {
+      // GCash and Credit Card → real Stripe checkout
+      if (selectedMethod === 'GCASH' || selectedMethod === 'Credit Card') {
+        const res = await paymentAPI.createStripeSession({
+          membershipId: plan.id,
+          paymentMethod: selectedMethod,
+        });
+        const { sessionUrl } = res.data.data;
+        // Redirect to Stripe hosted checkout page
+        window.location.href = sessionUrl;
+        return;
+      }
+      // Bank Transfer → existing flow (PENDING, manual confirmation)
       const res = await paymentAPI.createPayment({
         membershipId: plan.id,
         amount: plan.price,
@@ -76,7 +90,11 @@ const PaymentPage = () => {
       });
       setSuccess(res.data.data);
     } catch (err: any) {
-      const msg = err.response?.data?.error?.message || 'Payment failed. Please try again.';
+      const status = err.response?.status;
+      const msg = err.response?.data?.error?.message
+        || (status === 401 || status === 403 ? 'Session expired. Please log in again.' : null)
+        || (err.code === 'ERR_NETWORK' ? 'Server is offline. Please try again.' : null)
+        || 'Payment failed. Please try again.';
       setError(msg);
     } finally {
       setLoading(false);
@@ -238,9 +256,9 @@ const PaymentPage = () => {
                 <div className="flex-1">
                   <p className="font-semibold text-gray-900 text-sm">{method.label}</p>
                   <p className="text-gray-400 text-xs">
-                    {method.id === 'GCASH' && 'Pay instantly via GCash e-wallet'}
-                    {method.id === 'Credit Card' && 'Visa, Mastercard accepted'}
-                    {method.id === 'Bank Transfer' && 'BDO, BPI, UnionBank supported'}
+                    {method.id === 'GCASH' && 'Redirects to secure Stripe checkout'}
+                    {method.id === 'Credit Card' && 'Visa, Mastercard · Secure Stripe checkout'}
+                    {method.id === 'Bank Transfer' && 'BDO, BPI, UnionBank · Pending verification'}
                   </p>
                 </div>
                 <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center

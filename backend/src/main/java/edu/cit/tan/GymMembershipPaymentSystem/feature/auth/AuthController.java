@@ -7,14 +7,18 @@ import edu.cit.tan.GymMembershipPaymentSystem.feature.auth.AuthResponse;
 import edu.cit.tan.GymMembershipPaymentSystem.feature.auth.AuthService;
 import edu.cit.tan.GymMembershipPaymentSystem.shared.entity.User;
 import edu.cit.tan.GymMembershipPaymentSystem.shared.repository.UserRepository;
+import edu.cit.tan.GymMembershipPaymentSystem.shared.service.EmailService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -29,6 +33,12 @@ public class AuthController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private EmailService emailService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<?>> register(@Valid @RequestBody RegisterRequest request) {
@@ -154,6 +164,49 @@ public class AuthController {
             return ResponseEntity.internalServerError()
                     .body(ApiResponse.error("SYSTEM-001", "OAuth failed: " + e.getMessage(), null));
         }
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<ApiResponse<String>> forgotPassword(@RequestBody Map<String, String> body) {
+        String email = body.get("email");
+        if (email == null || email.isBlank())
+            return ResponseEntity.badRequest().body(ApiResponse.error("VALID-001", "Email is required", null));
+
+        userRepository.findByEmail(email.trim()).ifPresent(user -> {
+            String token = UUID.randomUUID().toString();
+            user.setResetToken(token);
+            user.setResetTokenExpiry(LocalDateTime.now().plusHours(1));
+            userRepository.save(user);
+            String resetLink = "http://localhost:5173/reset-password?token=" + token;
+            emailService.sendPasswordResetEmail(user, resetLink);
+        });
+        // Always return success to avoid email enumeration
+        return ResponseEntity.ok(ApiResponse.success("If that email exists, a reset link has been sent."));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<ApiResponse<String>> resetPassword(@RequestBody Map<String, String> body) {
+        String token = body.get("token");
+        String newPassword = body.get("newPassword");
+        String confirmPassword = body.get("confirmPassword");
+
+        if (token == null || newPassword == null || confirmPassword == null)
+            return ResponseEntity.badRequest().body(ApiResponse.error("VALID-001", "All fields are required", null));
+        if (!newPassword.equals(confirmPassword))
+            return ResponseEntity.badRequest().body(ApiResponse.error("VALID-002", "Passwords do not match", null));
+        if (newPassword.length() < 6)
+            return ResponseEntity.badRequest().body(ApiResponse.error("VALID-003", "Password must be at least 6 characters", null));
+
+        User user = userRepository.findByResetToken(token).orElse(null);
+        if (user == null || user.getResetTokenExpiry() == null || user.getResetTokenExpiry().isBefore(LocalDateTime.now()))
+            return ResponseEntity.badRequest().body(ApiResponse.error("AUTH-001", "Invalid or expired reset link", null));
+
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
+        user.setResetToken(null);
+        user.setResetTokenExpiry(null);
+        userRepository.save(user);
+
+        return ResponseEntity.ok(ApiResponse.success("Password reset successfully. You can now log in."));
     }
 
     @GetMapping("/me")

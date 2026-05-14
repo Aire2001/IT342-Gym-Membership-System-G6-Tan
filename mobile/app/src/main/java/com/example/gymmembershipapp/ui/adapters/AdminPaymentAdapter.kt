@@ -10,7 +10,8 @@ import com.example.gymmembershipapp.databinding.ItemAdminPaymentBinding
 class AdminPaymentAdapter(
     private val payments: List<AdminPaymentDTO>,
     private val onEditStatus: (AdminPaymentDTO, String) -> Unit,
-    private val onDelete: (AdminPaymentDTO) -> Unit
+    private val onDelete: (AdminPaymentDTO) -> Unit,
+    private val onItemClick: ((AdminPaymentDTO) -> Unit)? = null
 ) : RecyclerView.Adapter<AdminPaymentAdapter.VH>() {
 
     inner class VH(val binding: ItemAdminPaymentBinding) : RecyclerView.ViewHolder(binding.root)
@@ -37,6 +38,10 @@ class AdminPaymentAdapter(
             }
             tvStatus.setBackgroundColor(bg)
             tvStatus.setTextColor(fg)
+
+            if (onItemClick != null) {
+                holder.itemView.setOnClickListener { onItemClick.invoke(p) }
+            }
 
             btnEditStatus.setOnClickListener {
                 val statuses = arrayOf("PENDING", "COMPLETED", "FAILED")

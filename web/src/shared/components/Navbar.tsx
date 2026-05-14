@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../features/auth/AuthContext';
 
 const Navbar = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, isAdmin } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
@@ -20,7 +20,7 @@ const Navbar = () => {
   };
 
   const isActive = (path: string) =>
-    location.pathname === path
+    location.pathname === path || (path === '/admin' && location.pathname.startsWith('/admin'))
       ? 'text-blue-600 border-b-2 border-blue-600'
       : 'text-gray-500 hover:text-blue-600 transition-colors';
 
@@ -37,7 +37,7 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/dashboard" className="flex items-center gap-3">
+          <Link to={isAdmin ? '/admin' : '/dashboard'} className="flex items-center gap-3">
             <div className="w-9 h-9 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center shadow">
               <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 5.57 4.14 4.14 2.71 2.71 4.14l1.43 1.43L2 7.71l1.43 1.43L2 10.57 3.43 12 7 8.43 15.57 17 12 20.57 13.43 22l1.43-1.43L16.29 22l2.14-2.14 1.43 1.43 1.43-1.43-1.43-1.43L22 16.29l-1.43-1.43z"/>
@@ -56,9 +56,20 @@ const Navbar = () => {
 
           {/* Nav Links */}
           <div className="flex items-center gap-6 text-sm font-semibold">
-            <Link to="/dashboard" className={`pb-1 ${isActive('/dashboard')}`}>Dashboard</Link>
-            <Link to="/memberships" className={`pb-1 ${isActive('/memberships')}`}>Plans</Link>
-            <Link to="/payments/history" className={`pb-1 ${isActive('/payments/history')}`}>History</Link>
+            {isAdmin ? (
+              <>
+                <Link to="/admin" className={`pb-1 ${isActive('/admin')}`}>Dashboard</Link>
+                <Link to="/memberships" className={`pb-1 ${isActive('/memberships')}`}>Plans</Link>
+                <Link to="/admin?tab=payments" className={`pb-1 ${isActive('/admin?tab=payments')}`}>Payments</Link>
+                <Link to="/admin?tab=users" className={`pb-1 ${isActive('/admin?tab=users')}`}>Users</Link>
+              </>
+            ) : (
+              <>
+                <Link to="/dashboard" className={`pb-1 ${isActive('/dashboard')}`}>Dashboard</Link>
+                <Link to="/memberships" className={`pb-1 ${isActive('/memberships')}`}>Plans</Link>
+                <Link to="/payments/history" className={`pb-1 ${isActive('/payments/history')}`}>History</Link>
+              </>
+            )}
           </div>
 
           {/* User + Logout */}

@@ -80,12 +80,50 @@
     <!-- Users tab -->
     <LinearLayout android:id="@+id/tab_users" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="vertical" android:visibility="gone" android:padding="16dp">
         <TextView android:id="@+id/tv_users_title" android:text="Users" android:textSize="18sp" android:textStyle="bold" android:textColor="#111827" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginBottom="10dp" />
+        <EditText
+            android:id="@+id/et_search_users"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:hint="Search by name, email, role…"
+            android:textSize="13sp"
+            android:background="@android:color/white"
+            android:paddingHorizontal="12dp"
+            android:layout_marginBottom="8dp"
+            android:inputType="text" />
+        <TextView
+            android:id="@+id/tv_empty_users"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:textColor="#6B7280"
+            android:textSize="14sp"
+            android:gravity="center"
+            android:paddingVertical="32dp" />
         <androidx.recyclerview.widget.RecyclerView android:id="@+id/rv_users" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" />
     </LinearLayout>
 
     <!-- Payments tab -->
     <LinearLayout android:id="@+id/tab_payments" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="vertical" android:visibility="gone" android:padding="16dp">
         <TextView android:id="@+id/tv_payments_title" android:text="Payments" android:textSize="18sp" android:textStyle="bold" android:textColor="#111827" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginBottom="10dp" />
+        <EditText
+            android:id="@+id/et_search_payments"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:hint="Search by reference, user, plan…"
+            android:textSize="13sp"
+            android:background="@android:color/white"
+            android:paddingHorizontal="12dp"
+            android:layout_marginBottom="8dp"
+            android:inputType="text" />
+        <TextView
+            android:id="@+id/tv_empty_payments"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:textColor="#6B7280"
+            android:textSize="14sp"
+            android:gravity="center"
+            android:paddingVertical="32dp" />
         <androidx.recyclerview.widget.RecyclerView android:id="@+id/rv_admin_payments" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" />
     </LinearLayout>
 

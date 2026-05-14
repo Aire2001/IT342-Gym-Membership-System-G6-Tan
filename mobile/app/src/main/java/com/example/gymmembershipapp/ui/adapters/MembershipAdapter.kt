@@ -10,7 +10,9 @@ import com.example.gymmembershipapp.databinding.ItemMembershipPlanBinding
 class MembershipAdapter(
     private val plans: List<MembershipDTO>,
     private val isAdmin: Boolean,
-    private val onSelect: (MembershipDTO) -> Unit
+    private val onSelect: (MembershipDTO) -> Unit,
+    private val onEdit: ((MembershipDTO) -> Unit)? = null,
+    private val onDelete: ((MembershipDTO) -> Unit)? = null
 ) : RecyclerView.Adapter<MembershipAdapter.VH>() {
 
     inner class VH(val binding: ItemMembershipPlanBinding) : RecyclerView.ViewHolder(binding.root)
@@ -36,9 +38,13 @@ class MembershipAdapter(
             }
 
             if (isAdmin) {
-                btnSelect.isEnabled = false
-                btnSelect.alpha = 0.5f
+                btnSelect.visibility = View.GONE
+                layoutAdminButtons.visibility = View.VISIBLE
+                btnEditPlan.setOnClickListener { onEdit?.invoke(plan) }
+                btnDeletePlan.setOnClickListener { onDelete?.invoke(plan) }
             } else {
+                btnSelect.visibility = View.VISIBLE
+                layoutAdminButtons.visibility = View.GONE
                 btnSelect.isEnabled = true
                 btnSelect.alpha = 1f
                 btnSelect.setOnClickListener { onSelect(plan) }

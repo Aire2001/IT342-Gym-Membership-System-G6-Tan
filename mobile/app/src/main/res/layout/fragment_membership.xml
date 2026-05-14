@@ -10,9 +10,9 @@
         <TextView android:text="Choose the plan that fits your lifestyle" android:textSize="13sp" android:textColor="#6B7280" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" />
     </LinearLayout>
 
-    <!-- Admin warning -->
+    <!-- Admin management bar -->
     <androidx.cardview.widget.CardView
-        android:id="@+id/card_admin_warning"
+        android:id="@+id/card_admin_management"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:elevation="0dp"
@@ -20,11 +20,42 @@
         android:layout_marginHorizontal="16dp"
         android:layout_marginBottom="8dp"
         android:visibility="gone">
-        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="12dp" android:background="#FEF3C7">
-            <TextView android:text="Admin accounts cannot purchase memberships." android:textSize="12sp" android:textStyle="bold" android:textColor="#92400E" android:layout_width="wrap_content" android:layout_height="wrap_content" />
-            <TextView android:text="Use the Admin panel to manage members and plans." android:textSize="11sp" android:textColor="#92400E" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:padding="12dp" android:background="#EFF6FF" android:gravity="center_vertical">
+            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
+                <TextView android:text="Admin — Plan Management" android:textSize="13sp" android:textStyle="bold" android:textColor="#1E40AF" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+                <TextView android:text="Add, edit or delete membership plans." android:textSize="11sp" android:textColor="#3B82F6" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" />
+            </LinearLayout>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_add_plan"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="+ Add Plan"
+                android:textSize="12sp"
+                style="@style/Widget.MaterialComponents.Button" />
         </LinearLayout>
     </androidx.cardview.widget.CardView>
+
+    <EditText
+        android:id="@+id/et_search_plans"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:hint="Search plans…"
+        android:textSize="13sp"
+        android:background="@android:color/white"
+        android:paddingHorizontal="12dp"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="8dp"
+        android:inputType="text" />
+
+    <TextView
+        android:id="@+id/tv_empty_plans"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:textColor="#6B7280"
+        android:textSize="14sp"
+        android:gravity="center"
+        android:paddingVertical="32dp" />
 
     <ProgressBar
         android:id="@+id/progress"

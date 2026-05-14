@@ -4,12 +4,15 @@ import edu.cit.tan.GymMembershipPaymentSystem.shared.dto.ApiResponse;
 import edu.cit.tan.GymMembershipPaymentSystem.shared.entity.Payment;
 import edu.cit.tan.GymMembershipPaymentSystem.shared.entity.User;
 import edu.cit.tan.GymMembershipPaymentSystem.shared.entity.UserRole;
+import edu.cit.tan.GymMembershipPaymentSystem.shared.repository.AuthTokenRepository;
 import edu.cit.tan.GymMembershipPaymentSystem.shared.repository.MembershipRepository;
 import edu.cit.tan.GymMembershipPaymentSystem.shared.repository.PaymentRepository;
+import edu.cit.tan.GymMembershipPaymentSystem.shared.repository.UserMembershipRepository;
 import edu.cit.tan.GymMembershipPaymentSystem.shared.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -29,6 +32,12 @@ public class AdminController {
 
     @Autowired
     private MembershipRepository membershipRepository;
+
+    @Autowired
+    private AuthTokenRepository authTokenRepository;
+
+    @Autowired
+    private UserMembershipRepository userMembershipRepository;
 
     @GetMapping("/users")
     @PreAuthorize("hasRole('ADMIN')")
@@ -109,15 +118,16 @@ public class AdminController {
 
     @DeleteMapping("/users/{id}")
     @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
     public ApiResponse<String> deleteUser(@PathVariable Long id) {
         try {
-            User user = userRepository.findById(id).orElse(null);
-            if (user == null) {
+            if (!userRepository.existsById(id)) {
                 return ApiResponse.error("DB-001", "User not found with id: " + id, null);
             }
-            List<Payment> userPayments = paymentRepository.findByUserId(id);
-            paymentRepository.deleteAll(userPayments);
-            userRepository.delete(user);
+            authTokenRepository.deleteByUserId(id);
+            userMembershipRepository.deleteByUserId(id);
+            paymentRepository.deleteByUserId(id);
+            userRepository.deleteById(id);
             return ApiResponse.success("User deleted successfully");
         } catch (Exception e) {
             return ApiResponse.error("DB-001", "Error deleting user: " + e.getMessage(), null);

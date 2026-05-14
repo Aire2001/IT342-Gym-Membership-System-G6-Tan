@@ -16,9 +16,15 @@ apiClient.interceptors.request.use((config) => {
 apiClient.interceptors.response.use(
   (res) => res,
   (err) => {
-    if (err.response?.status === 401) {
+    const status = err.response?.status;
+    const url: string = err.config?.url ?? '';
+    if (status === 401) {
       localStorage.clear();
       window.location.href = '/login';
+    } else if (status === 403 && url.includes('/admin')) {
+      // Token invalid/expired for admin endpoint — force re-login
+      localStorage.clear();
+      window.location.href = '/login?reason=session_expired';
     }
     return Promise.reject(err);
   }

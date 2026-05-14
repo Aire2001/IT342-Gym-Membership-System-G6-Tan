@@ -10,7 +10,8 @@ import com.example.gymmembershipapp.databinding.ItemAdminUserBinding
 class AdminUserAdapter(
     private val users: List<AdminUserDTO>,
     private val onEditRole: (AdminUserDTO, String) -> Unit,
-    private val onDelete: (AdminUserDTO) -> Unit
+    private val onDelete: (AdminUserDTO) -> Unit,
+    private val onItemClick: ((AdminUserDTO) -> Unit)? = null
 ) : RecyclerView.Adapter<AdminUserAdapter.VH>() {
 
     inner class VH(val binding: ItemAdminUserBinding) : RecyclerView.ViewHolder(binding.root)
@@ -38,6 +39,10 @@ class AdminUserAdapter(
                 Pair(0xFFDCFCE7.toInt(), 0xFF166534.toInt())
             tvRole.setBackgroundColor(bg)
             tvRole.setTextColor(fg)
+
+            if (onItemClick != null) {
+                holder.itemView.setOnClickListener { onItemClick.invoke(user) }
+            }
 
             btnEditRole.setOnClickListener {
                 val roles = arrayOf("MEMBER", "ADMIN")

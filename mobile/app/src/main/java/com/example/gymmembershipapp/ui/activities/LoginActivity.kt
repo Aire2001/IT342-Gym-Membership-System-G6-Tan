@@ -113,6 +113,8 @@ class LoginActivity : AppCompatActivity() {
     private fun showError(msg: String) {
         binding.tvError.text = msg
         binding.tvError.visibility = View.VISIBLE
+        binding.tvError.removeCallbacks(null)
+        binding.tvError.postDelayed({ binding.tvError.visibility = View.GONE }, 3000)
     }
 
     private fun goToMain() {

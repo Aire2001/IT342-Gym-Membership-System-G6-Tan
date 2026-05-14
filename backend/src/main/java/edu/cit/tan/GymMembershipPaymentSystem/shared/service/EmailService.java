@@ -87,6 +87,39 @@ public class EmailService {
         }
     }
 
+    /** Password reset email — sent when user requests a password reset */
+    public void sendPasswordResetEmail(User user, String resetLink) {
+        if (!isConfigured()) return;
+        try {
+            var msg = mailSender.createMimeMessage();
+            var helper = new MimeMessageHelper(msg, true, "UTF-8");
+            helper.setFrom(fromEmail, "FitLife Gym");
+            helper.setTo(user.getEmail());
+            helper.setSubject("FitLife Gym – Password Reset Request");
+            helper.setText("""
+                    <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;background:#f9fafb;padding:24px;border-radius:12px">
+                      <div style="background:#2563EB;padding:20px 24px;border-radius:8px 8px 0 0;text-align:center">
+                        <h1 style="color:#fff;margin:0;font-size:22px">FitLife Gym</h1>
+                        <p style="color:#bfdbfe;margin:4px 0 0;font-size:13px">Password Reset</p>
+                      </div>
+                      <div style="background:#fff;padding:28px 24px;border-radius:0 0 8px 8px;border:1px solid #e5e7eb">
+                        <p style="color:#374151;font-size:15px">Hi <strong>%s</strong>,</p>
+                        <p style="color:#6b7280;font-size:14px">We received a request to reset your password. Click the button below to set a new password. This link expires in <strong>1 hour</strong>.</p>
+                        <div style="text-align:center;margin:28px 0">
+                          <a href="%s" style="background:#2563EB;color:#fff;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:bold;font-size:15px;display:inline-block">Reset My Password</a>
+                        </div>
+                        <p style="color:#9ca3af;font-size:12px">If you did not request a password reset, you can safely ignore this email. Your password will not change.</p>
+                        <p style="color:#9ca3af;font-size:11px;margin-top:16px;word-break:break-all">Or copy this link: %s</p>
+                        <p style="color:#9ca3af;font-size:12px;margin-top:24px;text-align:center">FitLife Gym – Stay fit, stay healthy!</p>
+                      </div>
+                    </div>
+                    """.formatted(user.getFirstname(), resetLink, resetLink), true);
+            mailSender.send(msg);
+        } catch (Exception e) {
+            System.err.println("⚠️ Email send failed (password reset): " + e.getMessage());
+        }
+    }
+
     /** Welcome email — sent to new user on registration */
     public void sendWelcomeEmail(User user) {
         if (!isConfigured()) return;

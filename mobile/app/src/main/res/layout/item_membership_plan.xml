@@ -34,5 +34,34 @@
                 android:textStyle="bold"
                 style="@style/Widget.MaterialComponents.Button" />
         </LinearLayout>
+
+        <!-- Admin Edit/Delete buttons (shown only when admin) -->
+        <LinearLayout
+            android:id="@+id/layout_admin_buttons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:visibility="gone"
+            android:layout_marginTop="8dp">
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_edit_plan"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Edit"
+                android:textSize="13sp"
+                android:layout_marginEnd="4dp"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_delete_plan"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Delete"
+                android:textSize="13sp"
+                android:textColor="#EF4444"
+                android:layout_marginStart="4dp"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+        </LinearLayout>
     </LinearLayout>
 </androidx.cardview.widget.CardView>

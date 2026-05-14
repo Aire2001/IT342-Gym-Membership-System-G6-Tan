@@ -4,10 +4,13 @@ import { AuthProvider, useAuth } from './features/auth/AuthContext';
 import Navbar from './shared/components/Navbar';
 import Login from './features/auth/LoginPage';
 import Register from './features/auth/RegisterPage';
+import ForgotPassword from './features/auth/ForgotPasswordPage';
+import ResetPassword from './features/auth/ResetPasswordPage';
 import Dashboard from './features/dashboard/DashboardPage';
 import MembershipPlans from './features/membership/MembershipPlansPage';
 import PaymentPage from './features/payment/PaymentPage';
 import PaymentHistory from './features/payment/PaymentHistoryPage';
+import StripeSuccess from './features/payment/StripeSuccessPage';
 import AdminPanel from './features/admin/AdminPanelPage';
 import Profile from './features/profile/ProfilePage';
 
@@ -38,6 +41,8 @@ const AppRoutes = () => {
       {/* Public routes */}
       <Route path="/login" element={user ? <Navigate to="/dashboard" /> : <Login />} />
       <Route path="/register" element={user ? <Navigate to="/dashboard" /> : <Register />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
 
       {/* Protected routes */}
       <Route path="/dashboard" element={
@@ -51,6 +56,9 @@ const AppRoutes = () => {
       } />
       <Route path="/payments/history" element={
         <ProtectedRoute><AppLayout><PaymentHistory /></AppLayout></ProtectedRoute>
+      } />
+      <Route path="/payment/success" element={
+        <ProtectedRoute><AppLayout><StripeSuccess /></AppLayout></ProtectedRoute>
       } />
       <Route path="/admin" element={
         <ProtectedRoute><AppLayout><AdminPanel /></AppLayout></ProtectedRoute>

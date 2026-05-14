@@ -8,4 +8,8 @@ export const authAPI = {
   logout: () => apiClient.post('/auth/logout'),
   googleLogin: (data: { idToken: string }) =>
     apiClient.post('/auth/oauth/google', data),
+  forgotPassword: (data: { email: string }) =>
+    apiClient.post('/auth/forgot-password', data),
+  resetPassword: (data: { token: string; newPassword: string; confirmPassword: string }) =>
+    apiClient.post('/auth/reset-password', data),
 };

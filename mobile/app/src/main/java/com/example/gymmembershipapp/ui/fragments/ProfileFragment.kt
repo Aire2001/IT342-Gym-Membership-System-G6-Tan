@@ -127,6 +127,8 @@ class ProfileFragment : Fragment() {
         tv.setBackgroundColor(if (isError) 0xFFFEE2E2.toInt() else 0xFFD1FAE5.toInt())
         tv.setTextColor(if (isError) 0xFFDC2626.toInt() else 0xFF065F46.toInt())
         tv.visibility = View.VISIBLE
+        tv.removeCallbacks(null)
+        tv.postDelayed({ tv.visibility = View.GONE }, 3000)
     }
 
     override fun onDestroyView() {

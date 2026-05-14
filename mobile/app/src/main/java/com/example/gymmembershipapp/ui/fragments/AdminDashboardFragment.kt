@@ -1,7 +1,9 @@
 package com.example.gymmembershipapp.ui.fragments
 
 import android.os.Bundle
+import android.text.Editable
 import android.text.InputType
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,6 +13,8 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.gymmembershipapp.data.AdminPaymentDTO
+import com.example.gymmembershipapp.data.AdminUserDTO
 import com.example.gymmembershipapp.databinding.FragmentAdminDashboardBinding
 import com.example.gymmembershipapp.ui.activities.MainActivity
 import com.example.gymmembershipapp.ui.adapters.AdminPaymentAdapter
@@ -25,6 +29,9 @@ class AdminDashboardFragment : Fragment() {
 
     private var _binding: FragmentAdminDashboardBinding? = null
     private val binding get() = _binding!!
+
+    private var allUsers: List<AdminUserDTO> = emptyList()
+    private var allPayments: List<AdminPaymentDTO> = emptyList()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentAdminDashboardBinding.inflate(inflater, container, false)
@@ -56,23 +63,33 @@ class AdminDashboardFragment : Fragment() {
 
         vm.loadAll()
 
+        binding.etSearchUsers.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) { applyUserFilter(vm, s?.toString() ?: "") }
+        })
+
+        binding.etSearchPayments.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) { applyPaymentFilter(vm, s?.toString() ?: "") }
+        })
+
         viewLifecycleOwner.lifecycleScope.launch {
             vm.adminUsers.collect { state ->
                 when (state) {
                     is DataState.Loading -> binding.progress.visibility = View.VISIBLE
                     is DataState.Success -> {
                         binding.progress.visibility = View.GONE
-                        val users = state.data
-                        binding.tvMembers.text = "${users.count { it.role.equals("MEMBER", ignoreCase = true) }}"
-
-                        binding.rvUsers.adapter = AdminUserAdapter(users,
+                        allUsers = state.data
+                        binding.tvMembers.text = "${allUsers.count { it.role.equals("MEMBER", ignoreCase = true) }}"
+                        binding.rvRecentUsers.adapter = AdminUserAdapter(
+                            allUsers.takeLast(3),
                             onEditRole = { user, role -> vm.updateUserRole(user.id, role) },
-                            onDelete = { user -> vm.deleteUser(user.id) }
+                            onDelete = { user -> vm.deleteUser(user.id) },
+                            onItemClick = { user -> showUserProfileDialog(user) }
                         )
-                        binding.rvRecentUsers.adapter = AdminUserAdapter(users.takeLast(3),
-                            onEditRole = { user, role -> vm.updateUserRole(user.id, role) },
-                            onDelete = { user -> vm.deleteUser(user.id) }
-                        )
+                        applyUserFilter(vm, binding.etSearchUsers.text?.toString() ?: "")
                     }
                     is DataState.Error -> binding.progress.visibility = View.GONE
                     else -> {}
@@ -83,19 +100,21 @@ class AdminDashboardFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             vm.adminPayments.collect { state ->
                 if (state is DataState.Success) {
-                    val payments = state.data
-                    val completed = payments.filter { it.paymentStatus.equals("COMPLETED", ignoreCase = true) }
+                    allPayments = state.data
+                    val completed = allPayments.filter { it.paymentStatus.equals("COMPLETED", ignoreCase = true) }
                     binding.tvRevenue.text = "₱${String.format("%,.0f", completed.sumOf { it.amount })}"
                     binding.tvCompleted.text = "${completed.size}"
-
-                    binding.rvAdminPayments.adapter = AdminPaymentAdapter(payments,
+                    binding.rvRecentPayments.adapter = AdminPaymentAdapter(
+                        allPayments.takeLast(3),
                         onEditStatus = { p, status -> vm.updatePaymentStatus(p.paymentId, status) },
-                        onDelete = { p -> vm.deletePayment(p.paymentId) }
+                        onDelete = { p -> vm.deletePayment(p.paymentId) },
+                        onItemClick = { p ->
+                            val user = allUsers.find { it.email.equals(p.userEmail, ignoreCase = true) }
+                                ?: AdminUserDTO(id = -1, firstname = "", lastname = "", email = p.userEmail ?: "—", role = "USER", createdAt = null)
+                            showUserProfileDialog(user)
+                        }
                     )
-                    binding.rvRecentPayments.adapter = AdminPaymentAdapter(payments.takeLast(3),
-                        onEditStatus = { p, status -> vm.updatePaymentStatus(p.paymentId, status) },
-                        onDelete = { p -> vm.deletePayment(p.paymentId) }
-                    )
+                    applyPaymentFilter(vm, binding.etSearchPayments.text?.toString() ?: "")
                 }
             }
         }
@@ -118,11 +137,90 @@ class AdminDashboardFragment : Fragment() {
         }
     }
 
+    private fun applyUserFilter(vm: AdminViewModel, query: String) {
+        val filtered = if (query.isBlank()) allUsers
+        else allUsers.filter {
+            val q = query.lowercase()
+            it.firstname?.lowercase()?.contains(q) == true ||
+            it.lastname?.lowercase()?.contains(q) == true ||
+            it.email.lowercase().contains(q) ||
+            it.role.lowercase().contains(q)
+        }
+        binding.rvUsers.adapter = AdminUserAdapter(filtered,
+            onEditRole = { user, role -> vm.updateUserRole(user.id, role) },
+            onDelete = { user -> vm.deleteUser(user.id) }
+        )
+        if (filtered.isEmpty()) {
+            binding.tvEmptyUsers.text = if (query.isBlank()) "No users found." else "No users matching \"$query\""
+            binding.tvEmptyUsers.visibility = View.VISIBLE
+        } else {
+            binding.tvEmptyUsers.visibility = View.GONE
+        }
+    }
+
+    private fun applyPaymentFilter(vm: AdminViewModel, query: String) {
+        val filtered = if (query.isBlank()) allPayments
+        else allPayments.filter {
+            val q = query.lowercase()
+            it.paymentReference?.lowercase()?.contains(q) == true ||
+            it.userEmail?.lowercase()?.contains(q) == true ||
+            it.membershipName?.lowercase()?.contains(q) == true ||
+            it.paymentStatus.lowercase().contains(q)
+        }
+        binding.rvAdminPayments.adapter = AdminPaymentAdapter(filtered,
+            onEditStatus = { p, status -> vm.updatePaymentStatus(p.paymentId, status) },
+            onDelete = { p -> vm.deletePayment(p.paymentId) }
+        )
+        if (filtered.isEmpty()) {
+            binding.tvEmptyPayments.text = if (query.isBlank()) "No payments found." else "No payments matching \"$query\""
+            binding.tvEmptyPayments.visibility = View.VISIBLE
+        } else {
+            binding.tvEmptyPayments.visibility = View.GONE
+        }
+    }
+
     private fun showTab(index: Int) {
         binding.tabOverview.visibility  = if (index == 0) View.VISIBLE else View.GONE
         binding.tabUsers.visibility     = if (index == 1) View.VISIBLE else View.GONE
         binding.tabPayments.visibility  = if (index == 2) View.VISIBLE else View.GONE
         binding.tabPlans.visibility     = if (index == 3) View.VISIBLE else View.GONE
+    }
+
+    private fun showUserProfileDialog(user: AdminUserDTO) {
+        val ctx = requireContext()
+        val first = user.firstname ?: ""
+        val last = user.lastname ?: ""
+        val fullName = "$first $last".trim().ifEmpty { "—" }
+        val userPayments = allPayments.filter { it.userEmail.equals(user.email, ignoreCase = true) }
+        val totalSpent = userPayments.filter { it.paymentStatus.equals("COMPLETED", ignoreCase = true) }.sumOf { it.amount }
+
+        val sb = StringBuilder()
+        sb.appendLine("📧  ${user.email}")
+        sb.appendLine("🏷️  Role: ${user.role}")
+        if (user.createdAt != null) sb.appendLine("📅  Joined: ${user.createdAt.take(10)}")
+        if (user.id > 0) sb.appendLine("🔑  Account ID: #${user.id}")
+        sb.appendLine()
+        sb.appendLine("💳  Total Payments: ${userPayments.size}")
+        sb.appendLine("💰  Total Spent: ₱${String.format("%,.2f", totalSpent)}")
+        if (userPayments.isNotEmpty()) {
+            sb.appendLine()
+            sb.appendLine("── Payment History ──")
+            userPayments.sortedByDescending { it.paymentDate }.forEach { p ->
+                val status = when (p.paymentStatus.uppercase()) {
+                    "COMPLETED" -> "✅"
+                    "PENDING" -> "⏳"
+                    else -> "❌"
+                }
+                sb.appendLine("$status  ${p.membershipName ?: "—"}  ₱${String.format("%,.2f", p.amount)}")
+                sb.appendLine("      ${p.paymentDate?.take(10) ?: "—"}  ${p.paymentMethod ?: ""}")
+            }
+        }
+
+        AlertDialog.Builder(ctx)
+            .setTitle(fullName)
+            .setMessage(sb.toString().trim())
+            .setPositiveButton("Close", null)
+            .show()
     }
 
     private fun showPlanDialog(

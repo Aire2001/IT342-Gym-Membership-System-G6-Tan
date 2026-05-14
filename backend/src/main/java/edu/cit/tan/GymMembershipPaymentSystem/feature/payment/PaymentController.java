@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/payments")
@@ -79,8 +80,9 @@ public class PaymentController {
 
             System.out.println("✅ Membership found: " + membership.getName() + " (₱" + membership.getPrice() + ")");
 
-            // Generate payment reference
-            String paymentReference = "PAY-" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss"));
+            // Generate payment reference — UUID suffix guarantees uniqueness even in same second
+            String paymentReference = "PAY-" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss"))
+                    + "-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
             System.out.println("🔖 Generated Payment Reference: " + paymentReference);
 
             // Determine payment status based on method
