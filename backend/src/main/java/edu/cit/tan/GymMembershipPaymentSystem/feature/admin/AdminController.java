@@ -95,6 +95,7 @@ public class AdminController {
 
     @PutMapping("/users/{id}/role")
     @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
     public ApiResponse<User> updateUserRole(@PathVariable Long id, @RequestBody Map<String, String> request) {
         try {
             User user = userRepository.findById(id).orElse(null);
@@ -136,6 +137,7 @@ public class AdminController {
 
     @PutMapping("/payments/{id}/status")
     @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
     public ResponseEntity<ApiResponse<String>> updatePaymentStatus(
             @PathVariable Long id, @RequestBody Map<String, String> body) {
         try {
@@ -155,6 +157,7 @@ public class AdminController {
 
     @DeleteMapping("/payments/{id}")
     @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
     public ResponseEntity<ApiResponse<String>> deletePayment(@PathVariable Long id) {
         try {
             if (!paymentRepository.existsById(id))

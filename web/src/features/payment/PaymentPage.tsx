@@ -62,8 +62,8 @@ const PaymentPage = () => {
           membershipId: plan.id,
           paymentMethod: selectedMethod,
         });
-        const { sessionUrl } = res.data.data;
-        // Redirect to Stripe hosted checkout page
+        const sessionUrl = res.data.data?.sessionUrl;
+        if (!sessionUrl) { setError('Failed to create payment session.'); return; }
         window.location.href = sessionUrl;
         return;
       }

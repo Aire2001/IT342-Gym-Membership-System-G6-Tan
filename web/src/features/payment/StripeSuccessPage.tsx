@@ -24,6 +24,11 @@ const StripeSuccessPage = () => {
     paymentAPI.verifyStripePayment(sessionId)
       .then((res) => {
         const d = res.data.data;
+        if (!d) {
+          setStatus('error');
+          setErrorMsg(res.data.error?.message || 'Verification failed.');
+          return;
+        }
         if (d.paymentStatus === 'COMPLETED') {
           setData({
             paymentReference: d.paymentReference,

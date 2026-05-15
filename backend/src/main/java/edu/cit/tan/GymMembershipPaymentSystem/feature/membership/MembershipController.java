@@ -51,6 +51,7 @@ public class MembershipController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
     public ResponseEntity<ApiResponse<MembershipDTO>> createMembership(@RequestBody Map<String, Object> body) {
         try {
             Membership m = new Membership();
@@ -72,6 +73,7 @@ public class MembershipController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
     public ResponseEntity<ApiResponse<MembershipDTO>> updateMembership(@PathVariable Long id, @RequestBody Map<String, Object> body) {
         try {
             Membership m = membershipRepository.findById(id)
@@ -91,6 +93,7 @@ public class MembershipController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
     public ResponseEntity<ApiResponse<String>> deleteMembership(@PathVariable Long id) {
         try {
             membershipRepository.deleteById(id);
