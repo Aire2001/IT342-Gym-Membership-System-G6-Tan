@@ -90,7 +90,7 @@ class MembershipViewModel(private val apiService: ApiService) : ViewModel() {
                 if (res.isSuccessful && res.body()?.success == true) {
                     _paymentResult.value = DataState.Success(res.body()!!.data!!)
                 } else {
-                    _paymentResult.value = DataState.Error(res.body()?.message ?: "Payment failed")
+                    _paymentResult.value = DataState.Error(res.body()?.error?.message ?: "Payment failed")
                 }
             } catch (e: Exception) {
                 _paymentResult.value = DataState.Error("Cannot reach server")

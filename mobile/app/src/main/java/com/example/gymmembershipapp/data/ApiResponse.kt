@@ -1,9 +1,15 @@
 package com.example.gymmembershipapp.data
 
+data class ErrorData(
+    val code: String?,
+    val message: String?
+)
+
 data class ApiResponse<T>(
     val success: Boolean,
-    val message: String?,
     val data: T?,
-    val errorCode: String?,
-    val errors: Map<String, String>?
+    val error: ErrorData?,
+    val message: String? = null,
+    val errorCode: String? = null,
+    val errors: Map<String, String>? = null
 )

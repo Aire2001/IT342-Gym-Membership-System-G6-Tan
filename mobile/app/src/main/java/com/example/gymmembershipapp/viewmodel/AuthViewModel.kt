@@ -74,7 +74,7 @@ class AuthViewModel(
                     )
                     _authState.value = AuthState.Success("Login successful")
                 } else {
-                    val msg = response.body()?.message ?: "Invalid credentials."
+                    val msg = response.body()?.error?.message ?: "Invalid credentials."
                     _authState.value = AuthState.Error(msg)
                 }
             } catch (e: Exception) {
@@ -123,7 +123,7 @@ class AuthViewModel(
                     _authState.value = AuthState.Success("Registration successful")
                 } else {
                     val fieldError = response.body()?.errors?.values?.firstOrNull()
-                    val msg = fieldError ?: response.body()?.message ?: "Registration failed."
+                    val msg = fieldError ?: response.body()?.error?.message ?: "Registration failed."
                     _authState.value = AuthState.Error(msg)
                 }
             } catch (e: Exception) {
@@ -171,7 +171,7 @@ class AuthViewModel(
                     )
                     _authState.value = AuthState.Success("Google login successful")
                 } else {
-                    val msg = response.body()?.message ?: "Google Sign-In failed."
+                    val msg = response.body()?.error?.message ?: "Google Sign-In failed."
                     _authState.value = AuthState.Error(msg)
                 }
             } catch (e: Exception) {

@@ -184,7 +184,7 @@ const Profile = () => {
       setShowEmailForm(false);
       setTimeout(() => logout(), 3000);
     } catch (err: any) {
-      const msg = err?.response?.data?.message ?? 'Failed to update email.';
+      const msg = err?.response?.data?.error?.message ?? 'Failed to update email.';
       setEmailMsg({ type: 'error', text: msg });
     } finally {
       setSavingEmail(false);
@@ -216,7 +216,7 @@ const Profile = () => {
       setPwMsg({ type: 'success', text: 'Password changed successfully!' });
       setPwForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
     } catch (err: any) {
-      const msg = err?.response?.data?.message ?? 'Failed to change password.';
+      const msg = err?.response?.data?.error?.message ?? 'Failed to change password.';
       setPwMsg({ type: 'error', text: msg });
     } finally {
       setSavingPw(false);
@@ -306,7 +306,7 @@ const Profile = () => {
                     </button>
                   )}
                 </div>
-                <p className="text-gray-400 text-xs mt-2">JPG, PNG or GIF · Max 2 MB</p>
+                <p className="text-gray-400 text-xs mt-2">JPG, PNG or GIF · Max 10 MB</p>
               </div>
             </div>
           </Section>

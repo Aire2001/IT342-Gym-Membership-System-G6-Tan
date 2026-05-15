@@ -200,7 +200,7 @@ class AdminViewModel(
                     tokenManager.saveName(firstname, lastname)
                     onSuccess()
                 } else {
-                    onError(res.body()?.message ?: "Failed to update profile")
+                    onError(res.body()?.error?.message ?: "Failed to update profile")
                 }
             } catch (e: Exception) {
                 onError("Cannot reach server")
@@ -215,7 +215,7 @@ class AdminViewModel(
                 if (res.isSuccessful && res.body()?.success == true) {
                     onSuccess()
                 } else {
-                    onError(res.body()?.message ?: "Failed to change password")
+                    onError(res.body()?.error?.message ?: "Failed to change password")
                 }
             } catch (e: Exception) {
                 onError("Cannot reach server")
@@ -230,7 +230,7 @@ class AdminViewModel(
                 if (res.isSuccessful && res.body()?.success == true) {
                     onSuccess()
                 } else {
-                    onError(res.body()?.message ?: "Failed to update email")
+                    onError(res.body()?.error?.message ?: "Failed to update email")
                 }
             } catch (e: Exception) {
                 onError("Cannot reach server")
