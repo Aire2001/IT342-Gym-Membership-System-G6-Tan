@@ -191,7 +191,7 @@ class AdminDashboardFragment : Fragment() {
         val first = user.firstname ?: ""
         val last = user.lastname ?: ""
         val fullName = "$first $last".trim().ifEmpty { "—" }
-        val userPayments = allPayments.filter { it.userEmail.equals(user.email, ignoreCase = true) }
+        val userPayments = allPayments.filter { it.userEmail?.equals(user.email, ignoreCase = true) == true }
         val totalSpent = userPayments.filter { it.paymentStatus.equals("COMPLETED", ignoreCase = true) }.sumOf { it.amount }
 
         val sb = StringBuilder()
