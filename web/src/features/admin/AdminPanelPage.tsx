@@ -404,7 +404,7 @@ const AdminPanel = () => {
                       { label: 'Pending', count: pendingCount, total: payments.length, color: 'bg-yellow-400' },
                       { label: 'Failed', count: failedCount, total: payments.length, color: 'bg-red-400' },
                     ].map(({ label, count, total, color }) => (
-                      <button key={label} onClick={() => setTab('payments')} className="w-full text-left group hover:bg-gray-50 rounded-lg px-2 py-1 -mx-2 transition-colors">
+                      <button key={label} onClick={() => { setPaymentStatusFilter(label.toUpperCase()); setTab('payments'); }} className="w-full text-left group hover:bg-gray-50 rounded-lg px-2 py-1 -mx-2 transition-colors">
                         <div className="flex justify-between text-xs text-gray-500 mb-1">
                           <span className="font-semibold group-hover:text-blue-600 transition-colors">{label}</span>
                           <span>{count} / {total}</span>
@@ -433,7 +433,7 @@ const AdminPanel = () => {
                           const pct = totalRevenue > 0 ? (rev / totalRevenue) * 100 : 0;
                           const colors: Record<string, string> = { Basic: 'bg-gray-400', Premium: 'bg-blue-500', Annual: 'bg-purple-500' };
                           return (
-                            <button key={plan} onClick={() => setTab('memberships')} className="w-full text-left group hover:bg-gray-50 rounded-lg px-2 py-1 -mx-2 transition-colors">
+                            <button key={plan} onClick={() => { setPaymentSearch(plan); setPaymentStatusFilter('All'); setTab('payments'); }} className="w-full text-left group hover:bg-gray-50 rounded-lg px-2 py-1 -mx-2 transition-colors">
                               <div className="flex justify-between text-xs text-gray-500 mb-1">
                                 <span className="font-semibold group-hover:text-blue-600 transition-colors">{plan}</span>
                                 <span>₱{rev.toLocaleString('en-PH')} ({pct.toFixed(0)}%)</span>
