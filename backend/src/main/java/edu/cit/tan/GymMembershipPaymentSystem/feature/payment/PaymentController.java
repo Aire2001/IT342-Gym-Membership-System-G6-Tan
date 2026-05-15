@@ -200,28 +200,32 @@ public class PaymentController {
         }
     }
 
-    // Get payment by ID
+    // Get payment by ID (owner or admin only)
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<Payment>> getPaymentById(@PathVariable Long id) {
         try {
-            System.out.println("🔍 Fetching payment by ID: " + id);
+            UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            User currentUser = userRepository.findByEmail(userDetails.getUsername())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+            boolean isAdmin = currentUser.getRole() != null && "ADMIN".equalsIgnoreCase(currentUser.getRole().name());
 
-            Payment payment = paymentRepository.findById(id)
-                    .orElse(null);
+            Payment payment = paymentRepository.findById(id).orElse(null);
 
             if (payment == null) {
-                System.out.println("⚠️ Payment not found with ID: " + id);
                 return ResponseEntity
                         .status(HttpStatus.NOT_FOUND)
                         .body(ApiResponse.error("DB-001", "Payment not found with id: " + id, null));
             }
 
-            System.out.println("✅ Payment found: " + payment.getPaymentReference());
+            if (!isAdmin && (payment.getUser() == null || !payment.getUser().getId().equals(currentUser.getId()))) {
+                return ResponseEntity
+                        .status(HttpStatus.FORBIDDEN)
+                        .body(ApiResponse.error("AUTH-001", "Access denied", null));
+            }
+
             return ResponseEntity.ok(ApiResponse.success(payment));
 
         } catch (Exception e) {
-            System.err.println("❌ Error fetching payment: " + e.getMessage());
-            e.printStackTrace();
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ApiResponse.error("DB-001", "Error fetching payment: " + e.getMessage(), null));

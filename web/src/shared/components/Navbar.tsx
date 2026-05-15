@@ -26,7 +26,7 @@ const Navbar = () => {
 
   const initials = user
     ? `${user.firstname?.[0] ?? ''}${user.lastname?.[0] ?? ''}`.toUpperCase() ||
-      user.email[0].toUpperCase()
+      (user.email?.[0]?.toUpperCase() ?? '')
     : '';
 
   if (!user) return null;
