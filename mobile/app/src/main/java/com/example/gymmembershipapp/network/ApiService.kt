@@ -11,6 +11,7 @@ import com.example.gymmembershipapp.data.PaymentDTO
 import com.example.gymmembershipapp.data.PaymentRequest
 import com.example.gymmembershipapp.data.PaymentResponse
 import com.example.gymmembershipapp.data.ProfileData
+import com.example.gymmembershipapp.data.QuoteDTO
 import com.example.gymmembershipapp.data.RegisterRequest
 import retrofit2.Response
 import retrofit2.http.*
@@ -59,6 +60,10 @@ interface ApiService {
     // ── Dashboard ─────────────────────────────────────────────────────────────
     @GET("api/v1/dashboard")
     suspend fun getDashboard(): Response<ApiResponse<DashboardData>>
+
+    // ── Quotes (external API proxy) ───────────────────────────────────────────
+    @GET("api/v1/quotes/daily")
+    suspend fun getQuote(): Response<ApiResponse<QuoteDTO>>
 
     // ── Profile ───────────────────────────────────────────────────────────────
     @GET("api/v1/profile")

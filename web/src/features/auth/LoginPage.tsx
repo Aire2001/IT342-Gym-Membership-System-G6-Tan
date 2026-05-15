@@ -34,8 +34,8 @@ const Login = () => {
     }
     setLoading(true);
     try {
-      await login(form.email, form.password);
-      navigate('/dashboard');
+      const role = await login(form.email, form.password);
+      navigate(role === 'ADMIN' ? '/admin' : '/dashboard');
     } catch (err: any) {
       const msg = err.response?.data?.error?.message || (err.code === 'ERR_NETWORK' ? 'Server is offline. Please try again.' : 'Invalid credentials. Please try again.');
       setError(msg);
@@ -49,8 +49,8 @@ const Login = () => {
     setLoading(true);
     setError('');
     try {
-      await googleLogin(credentialResponse.credential);
-      navigate('/dashboard');
+      const role = await googleLogin(credentialResponse.credential);
+      navigate(role === 'ADMIN' ? '/admin' : '/dashboard');
     } catch (err: any) {
       const msg = err.response?.data?.error?.message || 'Google Sign-In failed. Please try again.';
       setError(msg);

@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -132,12 +133,26 @@ public class AuthService {
         }
     }
 
-    public AuthResponse refreshToken(String refreshToken) {
+    public AuthResponse refreshToken(String accessToken) {
         Map<String, Object> data = new HashMap<>();
         try {
-            // Simple refresh - generate a new token
-            data.put("accessToken", "refreshed-" + UUID.randomUUID());
+            Optional<AuthToken> authTokenOpt = authTokenRepository.findByTokenAndIsValidTrue(accessToken);
+            if (authTokenOpt.isEmpty()) {
+                return new AuthResponse(false, "Invalid or expired token", null);
+            }
+            AuthToken old = authTokenOpt.get();
+            if (old.isExpired()) {
+                return new AuthResponse(false, "Token has expired, please log in again", null);
+            }
+            User user = old.getUser();
+            old.setValid(false);
+            authTokenRepository.save(old);
+            String newAccessToken = generateAndStoreToken(user);
+            data.put("accessToken", newAccessToken);
             data.put("refreshToken", UUID.randomUUID().toString());
+            data.put("role", user.getRole().toString());
+            data.put("userId", user.getId());
+            data.put("email", user.getEmail());
             return new AuthResponse(true, "Token refreshed successfully", data);
         } catch (Exception e) {
             return new AuthResponse(false, "Token refresh failed: " + e.getMessage(), null);

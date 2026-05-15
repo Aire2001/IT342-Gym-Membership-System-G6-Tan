@@ -6,20 +6,13 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import com.example.gymmembershipapp.R
 import com.example.gymmembershipapp.data.DashboardData
 import com.example.gymmembershipapp.databinding.FragmentDashboardBinding
 import com.example.gymmembershipapp.network.RetrofitClient
-import com.example.gymmembershipapp.network.TokenManager
 import com.example.gymmembershipapp.ui.activities.MainActivity
 import com.example.gymmembershipapp.viewmodel.DataState
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import org.json.JSONArray
-import java.net.URL
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.Calendar
@@ -75,19 +68,15 @@ class DashboardFragment : Fragment() {
             }
         }
 
-        // Fetch motivational quote
-        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+        // Fetch motivational quote via Retrofit
+        viewLifecycleOwner.lifecycleScope.launch {
             try {
-                val json = URL("http://10.0.2.2:8080/api/v1/quotes/daily").readText()
-                // Parse {"success":true,"data":{"quote":"...","author":"..."}}
-                val obj = org.json.JSONObject(json)
-                val data = obj.optJSONObject("data")
-                val quote = data?.optString("quote") ?: ""
-                val author = data?.optString("author") ?: ""
-                if (quote.isNotEmpty()) {
-                    withContext(Dispatchers.Main) {
-                        binding.tvQuote.text = quote
-                        binding.tvQuoteAuthor.text = "— $author"
+                val response = RetrofitClient.createService(tokenManager).getQuote()
+                if (response.isSuccessful) {
+                    val data = response.body()?.data
+                    if (!data?.quote.isNullOrEmpty()) {
+                        binding.tvQuote.text = data!!.quote
+                        binding.tvQuoteAuthor.text = "— ${data.author}"
                         binding.cardQuote.visibility = View.VISIBLE
                     }
                 }

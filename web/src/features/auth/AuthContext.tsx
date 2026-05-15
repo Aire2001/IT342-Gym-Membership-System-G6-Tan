@@ -13,8 +13,8 @@ interface User {
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  googleLogin: (idToken: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<string>;
+  googleLogin: (idToken: string) => Promise<string>;
   logout: () => Promise<void>;
   updateUser: (updates: Partial<User>) => void;
   isAdmin: boolean;
@@ -35,7 +35,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setIsLoading(false);
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string): Promise<string> => {
     const res = await authAPI.login({ email, password });
     const { accessToken, refreshToken, role, userId, firstname, lastname } = res.data.data;
     localStorage.setItem('accessToken', accessToken);
@@ -43,9 +43,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const userData: User = { userId: userId ?? 0, email, role, firstname, lastname };
     localStorage.setItem('user', JSON.stringify(userData));
     setUser(userData);
+    return role;
   };
 
-  const googleLogin = async (idToken: string) => {
+  const googleLogin = async (idToken: string): Promise<string> => {
     const res = await authAPI.googleLogin({ idToken });
     const { accessToken, refreshToken, role, userId, email, firstname, lastname, profilePicture } = res.data.data;
     localStorage.setItem('accessToken', accessToken);
@@ -53,6 +54,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const userData: User = { userId: userId ?? 0, email, role, firstname, lastname, profilePicture };
     localStorage.setItem('user', JSON.stringify(userData));
     setUser(userData);
+    return role;
   };
 
   const logout = async () => {
