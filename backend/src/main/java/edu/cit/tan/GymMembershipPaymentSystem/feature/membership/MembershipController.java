@@ -55,6 +55,8 @@ public class MembershipController {
         try {
             Membership m = new Membership();
             m.setName((String) body.get("name"));
+            if (body.get("durationMonths") == null) throw new IllegalArgumentException("durationMonths is required");
+            if (body.get("price") == null) throw new IllegalArgumentException("price is required");
             m.setDurationMonths(Integer.parseInt(body.get("durationMonths").toString()));
             m.setPrice(new BigDecimal(body.get("price").toString()));
             m.setDescription((String) body.get("description"));

@@ -105,8 +105,8 @@ const MembershipPlans = () => {
         showToast('Plan created successfully.');
       }
       setShowPlanForm(false);
-    } catch {
-      setError('Failed to save plan. Please try again.');
+    } catch (err: any) {
+      setError(err?.response?.data?.error?.message ?? 'Failed to save plan. Please try again.');
     } finally {
       setSaving(false);
     }

@@ -139,11 +139,18 @@ class AdminViewModel(
                 val body = mapOf<String, Any>("name" to name, "durationMonths" to durationMonths, "price" to price, "description" to description)
                 val res = apiService.createMembership(body)
                 if (res.isSuccessful && res.body()?.success == true) {
-                    val current = (_plans.value as? DataState.Success)?.data ?: emptyList()
-                    _plans.value = DataState.Success(current + listOf(res.body()!!.data!!))
-                    _actionState.value = DataState.Success("Plan created")
+                    val newPlan = res.body()?.data
+                    if (newPlan != null) {
+                        val current = (_plans.value as? DataState.Success)?.data ?: emptyList()
+                        _plans.value = DataState.Success(current + listOf(newPlan))
+                        _actionState.value = DataState.Success("Plan created")
+                    }
+                } else {
+                    _actionState.value = DataState.Error(res.body()?.error?.message ?: "Failed to create plan")
                 }
-            } catch (_: Exception) {}
+            } catch (e: Exception) {
+                _actionState.value = DataState.Error("Cannot reach server")
+            }
         }
     }
 
@@ -153,11 +160,18 @@ class AdminViewModel(
                 val body = mapOf<String, Any>("name" to name, "durationMonths" to durationMonths, "price" to price, "description" to description)
                 val res = apiService.updateMembership(id, body)
                 if (res.isSuccessful && res.body()?.success == true) {
-                    val current = (_plans.value as? DataState.Success)?.data ?: emptyList()
-                    _plans.value = DataState.Success(current.map { if (it.id == id) res.body()!!.data!! else it })
-                    _actionState.value = DataState.Success("Plan updated")
+                    val updated = res.body()?.data
+                    if (updated != null) {
+                        val current = (_plans.value as? DataState.Success)?.data ?: emptyList()
+                        _plans.value = DataState.Success(current.map { if (it.id == id) updated else it })
+                        _actionState.value = DataState.Success("Plan updated")
+                    }
+                } else {
+                    _actionState.value = DataState.Error(res.body()?.error?.message ?: "Failed to update plan")
                 }
-            } catch (_: Exception) {}
+            } catch (e: Exception) {
+                _actionState.value = DataState.Error("Cannot reach server")
+            }
         }
     }
 
@@ -180,7 +194,9 @@ class AdminViewModel(
             try {
                 val res = apiService.getProfile()
                 if (res.isSuccessful && res.body()?.success == true) {
-                    _profile.value = DataState.Success(res.body()!!.data!!)
+                    val data = res.body()?.data
+                    if (data != null) _profile.value = DataState.Success(data)
+                    else _profile.value = DataState.Error("Failed to load profile")
                 } else {
                     _profile.value = DataState.Error("Failed to load profile")
                 }

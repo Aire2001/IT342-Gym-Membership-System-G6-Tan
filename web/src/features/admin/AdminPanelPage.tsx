@@ -187,7 +187,7 @@ const AdminPanel = () => {
 
   const openEditPlan = (plan: any) => {
     setEditingPlan(plan);
-    setPlanForm({ name: plan.name, durationMonths: String(plan.durationMonths), price: String(plan.price), description: plan.description });
+    setPlanForm({ name: plan.name, durationMonths: String(plan.durationMonths), price: String(plan.price), description: plan.description ?? '' });
     setPlanErrors({ name: '', durationMonths: '', price: '' });
     setShowPlanForm(true);
   };

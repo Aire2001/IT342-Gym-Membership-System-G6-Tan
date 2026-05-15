@@ -141,7 +141,7 @@ public class PaymentController {
             // Send email notifications (non-blocking — failures are logged, not thrown)
             emailService.sendPaymentReceipt(user, savedPayment, membership);
             userRepository.findAll().stream()
-                    .filter(u -> "ADMIN".equalsIgnoreCase(u.getRole().name()))
+                    .filter(u -> u.getRole() != null && "ADMIN".equalsIgnoreCase(u.getRole().name()))
                     .forEach(admin -> emailService.sendAdminPaymentAlert(admin, user, savedPayment, membership));
 
             // Prepare response
@@ -176,6 +176,7 @@ public class PaymentController {
 
     // Get payment history for current user
     @GetMapping("/history")
+    @Transactional(readOnly = true)
     public ResponseEntity<ApiResponse<List<Payment>>> getPaymentHistory() {
         try {
             System.out.println("📋 Fetching payment history...");

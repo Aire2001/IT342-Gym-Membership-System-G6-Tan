@@ -16,8 +16,8 @@ const ForgotPasswordPage = () => {
     try {
       await authAPI.forgotPassword({ email: email.trim() });
       setSent(true);
-    } catch {
-      setError('Something went wrong. Please try again.');
+    } catch (err: any) {
+      setError(err?.response?.data?.error?.message ?? 'Something went wrong. Please try again.');
     } finally {
       setLoading(false);
     }

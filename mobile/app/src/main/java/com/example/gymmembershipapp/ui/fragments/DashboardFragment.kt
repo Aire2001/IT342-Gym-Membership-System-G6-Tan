@@ -75,9 +75,11 @@ class DashboardFragment : Fragment() {
                 if (response.isSuccessful) {
                     val data = response.body()?.data
                     if (!data?.quote.isNullOrEmpty()) {
-                        binding.tvQuote.text = data!!.quote
-                        binding.tvQuoteAuthor.text = "— ${data.author}"
-                        binding.cardQuote.visibility = View.VISIBLE
+                        data?.let {
+                            binding.tvQuote.text = it.quote
+                            binding.tvQuoteAuthor.text = "— ${it.author ?: "Unknown"}"
+                            binding.cardQuote.visibility = View.VISIBLE
+                        }
                     }
                 }
             } catch (_: Exception) {}

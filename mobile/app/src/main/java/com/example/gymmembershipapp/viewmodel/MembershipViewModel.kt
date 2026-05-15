@@ -72,7 +72,9 @@ class MembershipViewModel(private val apiService: ApiService) : ViewModel() {
             try {
                 val res = apiService.getDashboard()
                 if (res.isSuccessful && res.body()?.success == true) {
-                    _dashboard.value = DataState.Success(res.body()!!.data!!)
+                    val data = res.body()?.data
+                    if (data != null) _dashboard.value = DataState.Success(data)
+                    else _dashboard.value = DataState.Error("Failed to load dashboard")
                 } else {
                     _dashboard.value = DataState.Error("Failed to load dashboard")
                 }
@@ -88,7 +90,9 @@ class MembershipViewModel(private val apiService: ApiService) : ViewModel() {
             try {
                 val res = apiService.createPayment(PaymentRequest(membershipId, amount, paymentMethod))
                 if (res.isSuccessful && res.body()?.success == true) {
-                    _paymentResult.value = DataState.Success(res.body()!!.data!!)
+                    val data = res.body()?.data
+                    if (data != null) _paymentResult.value = DataState.Success(data)
+                    else _paymentResult.value = DataState.Error("Payment data not received")
                 } else {
                     _paymentResult.value = DataState.Error(res.body()?.error?.message ?: "Payment failed")
                 }

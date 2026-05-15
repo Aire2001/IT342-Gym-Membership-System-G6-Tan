@@ -157,8 +157,8 @@ const Profile = () => {
         profilePicture: newPhotoUrl ?? preview ?? undefined,
       });
       setProfileMsg({ type: 'success', text: 'Profile updated successfully!' });
-    } catch {
-      setProfileMsg({ type: 'error', text: 'Failed to save changes. Please try again.' });
+    } catch (err: any) {
+      setProfileMsg({ type: 'error', text: err?.response?.data?.error?.message ?? 'Failed to save changes. Please try again.' });
     } finally {
       setSavingProfile(false);
     }

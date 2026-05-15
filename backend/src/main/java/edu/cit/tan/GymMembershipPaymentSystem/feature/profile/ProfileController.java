@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -56,6 +57,7 @@ public class ProfileController {
     }
 
     @PutMapping
+    @Transactional
     public ResponseEntity<ApiResponse<Map<String, Object>>> updateProfile(
             @RequestBody Map<String, String> request) {
         try {
@@ -90,6 +92,7 @@ public class ProfileController {
     }
 
     @PostMapping("/change-password")
+    @Transactional
     public ResponseEntity<ApiResponse<?>> changePassword(@RequestBody Map<String, String> request) {
         try {
             UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext()
@@ -163,6 +166,7 @@ public class ProfileController {
     }
 
     @PostMapping("/upload-photo")
+    @Transactional
     public ResponseEntity<ApiResponse<Map<String, Object>>> uploadPhoto(
             @RequestParam("photo") MultipartFile file) {
         try {
@@ -211,6 +215,7 @@ public class ProfileController {
     }
 
     @PutMapping("/email")
+    @Transactional
     public ResponseEntity<ApiResponse<?>> changeEmail(@RequestBody Map<String, String> request) {
         try {
             UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext()
