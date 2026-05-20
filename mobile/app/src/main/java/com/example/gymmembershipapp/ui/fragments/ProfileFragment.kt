@@ -51,6 +51,7 @@ class ProfileFragment : Fragment() {
                     binding.etLastname.setText(state.data.lastname ?: lastName)
                     val isOAuth = state.data.isOAuthUser == true
                     binding.cardChangePw.visibility = if (isOAuth) View.GONE else View.VISIBLE
+                    binding.cardChangeEmail.visibility = if (isOAuth) View.GONE else View.VISIBLE
                     binding.cardSetPw.visibility = if (isOAuth) View.VISIBLE else View.GONE
                 }
             }
@@ -148,6 +149,44 @@ class ProfileFragment : Fragment() {
                     showMsg(binding.tvSetPwMsg, msg, isError = true)
                 }
             )
+        }
+
+        // Change email
+        binding.btnChangeEmail.setOnClickListener {
+            val newEmail = binding.etNewEmail.text?.toString()?.trim() ?: ""
+            val password = binding.etEmailPassword.text?.toString() ?: ""
+            if (newEmail.isBlank() || password.isBlank()) {
+                showMsg(binding.tvEmailMsg, "All fields are required.", isError = true)
+                return@setOnClickListener
+            }
+            if (!android.util.Patterns.EMAIL_ADDRESS.matcher(newEmail).matches()) {
+                showMsg(binding.tvEmailMsg, "Invalid email address.", isError = true)
+                return@setOnClickListener
+            }
+            AlertDialog.Builder(requireContext())
+                .setTitle("Change Email")
+                .setMessage("Are you sure? You will be signed out after changing your email.")
+                .setPositiveButton("Yes, Change") { _, _ ->
+                    binding.btnChangeEmail.isEnabled = false
+                    binding.btnChangeEmail.text = "Saving…"
+                    vm.changeEmail(newEmail, password,
+                        onSuccess = {
+                            binding.btnChangeEmail.isEnabled = true
+                            binding.btnChangeEmail.text = "Update Email"
+                            binding.etNewEmail.setText("")
+                            binding.etEmailPassword.setText("")
+                            showMsg(binding.tvEmailMsg, "Email updated! Signing you out…", isError = false)
+                            binding.tvEmailMsg.postDelayed({ activity.logout() }, 2000)
+                        },
+                        onError = { msg ->
+                            binding.btnChangeEmail.isEnabled = true
+                            binding.btnChangeEmail.text = "Update Email"
+                            showMsg(binding.tvEmailMsg, msg, isError = true)
+                        }
+                    )
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
         }
 
         // Logout

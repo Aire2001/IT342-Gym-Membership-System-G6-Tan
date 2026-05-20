@@ -101,6 +101,11 @@ public class ProfileController {
             User user = userRepository.findByEmail(userDetails.getUsername())
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
+            if (user.getPasswordHash() != null && user.getPasswordHash().startsWith("OAUTH_")) {
+                return ResponseEntity.badRequest()
+                        .body(ApiResponse.error("OAUTH-001", "You signed in with Google. Use 'Set Password' to create a password first.", null));
+            }
+
             String currentPassword = request.get("currentPassword");
             String newPassword = request.get("newPassword");
             String confirmPassword = request.get("confirmPassword");
@@ -263,6 +268,11 @@ public class ProfileController {
                     .getAuthentication().getPrincipal();
             User user = userRepository.findByEmail(userDetails.getUsername())
                     .orElseThrow(() -> new RuntimeException("User not found"));
+
+            if (user.getPasswordHash() != null && user.getPasswordHash().startsWith("OAUTH_")) {
+                return ResponseEntity.badRequest()
+                        .body(ApiResponse.error("OAUTH-001", "Your email is managed by Google and cannot be changed here.", null));
+            }
 
             String newEmail = request.get("newEmail");
             String password = request.get("password");

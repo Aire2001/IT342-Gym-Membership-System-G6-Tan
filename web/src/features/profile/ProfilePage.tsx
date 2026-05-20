@@ -172,8 +172,7 @@ const Profile = () => {
     }
   };
 
-  const handleChangeEmail = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleChangeEmail = () => {
     if (!emailForm.newEmail.trim() || !emailForm.password.trim()) {
       setEmailMsg({ type: 'error', text: 'All fields are required.' });
       return;
@@ -380,17 +379,17 @@ const Profile = () => {
               <div className="mt-1 p-4 bg-blue-50 border border-blue-100 rounded-xl">
                 <p className="text-xs text-blue-700 font-semibold mb-3">You will be logged out after changing your email.</p>
                 {emailMsg && <Alert type={emailMsg.type} msg={emailMsg.text} />}
-                <form onSubmit={handleChangeEmail} className="space-y-3">
+                <div className="space-y-3">
                   <Field label="New Email Address">
                     <input type="email" value={emailForm.newEmail} onChange={e => setEmailForm({ ...emailForm, newEmail: e.target.value })} placeholder="newaddress@example.com" className={inputCls} />
                   </Field>
                   <Field label="Confirm with Password">
                     <input type="password" value={emailForm.password} onChange={e => setEmailForm({ ...emailForm, password: e.target.value })} placeholder="Your current password" className={inputCls} />
                   </Field>
-                  <button type="submit" disabled={savingEmail} className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-bold rounded-xl text-sm transition-all">
+                  <button type="button" onClick={handleChangeEmail} disabled={savingEmail} className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-bold rounded-xl text-sm transition-all">
                     {savingEmail ? 'Saving…' : 'Update Email'}
                   </button>
-                </form>
+                </div>
               </div>
             )}
           </Section>
