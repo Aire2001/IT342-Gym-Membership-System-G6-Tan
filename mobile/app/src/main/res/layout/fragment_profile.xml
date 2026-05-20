@@ -56,8 +56,8 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- Change password -->
-        <androidx.cardview.widget.CardView android:layout_width="match_parent" android:layout_height="wrap_content" android:elevation="2dp" android:radius="16dp" android:layout_marginBottom="12dp">
+        <!-- Change password (email/password users) -->
+        <androidx.cardview.widget.CardView android:id="@+id/card_change_pw" android:layout_width="match_parent" android:layout_height="wrap_content" android:elevation="2dp" android:radius="16dp" android:layout_marginBottom="12dp">
             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
                 <TextView android:text="CHANGE PASSWORD" android:textSize="10sp" android:textStyle="bold" android:textColor="#6B7280" android:letterSpacing="0.1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginBottom="12dp" />
 
@@ -76,6 +76,27 @@
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.button.MaterialButton android:id="@+id/btn_change_pw" android:layout_width="match_parent" android:layout_height="48dp" android:text="Update Password" style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Set password (Google OAuth users only) -->
+        <androidx.cardview.widget.CardView android:id="@+id/card_set_pw" android:layout_width="match_parent" android:layout_height="wrap_content" android:elevation="2dp" android:radius="16dp" android:layout_marginBottom="12dp" android:visibility="gone">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+                <TextView android:text="SET A PASSWORD" android:textSize="10sp" android:textStyle="bold" android:textColor="#6B7280" android:letterSpacing="0.1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginBottom="8dp" />
+
+                <TextView android:text="You signed in with Google. Set a password to also log in with your email." android:textSize="12sp" android:textColor="#1D4ED8" android:background="#DBEAFE" android:padding="10dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="12dp" />
+
+                <TextView android:id="@+id/tv_set_pw_msg" android:layout_width="match_parent" android:layout_height="wrap_content" android:visibility="gone" android:padding="10dp" android:textSize="13sp" android:layout_marginBottom="10dp" />
+
+                <com.google.android.material.textfield.TextInputLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="New Password" style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox" app:passwordToggleEnabled="true" android:layout_marginBottom="10dp" xmlns:app="http://schemas.android.com/apk/res-auto">
+                    <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_set_new_pw" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="textPassword" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Confirm Password" style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox" app:passwordToggleEnabled="true" android:layout_marginBottom="14dp" xmlns:app="http://schemas.android.com/apk/res-auto">
+                    <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_set_confirm_pw" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="textPassword" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.button.MaterialButton android:id="@+id/btn_set_pw" android:layout_width="match_parent" android:layout_height="48dp" android:text="Set Password" style="@style/Widget.MaterialComponents.Button" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 

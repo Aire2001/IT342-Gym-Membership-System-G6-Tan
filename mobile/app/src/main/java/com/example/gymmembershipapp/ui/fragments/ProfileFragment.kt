@@ -49,6 +49,9 @@ class ProfileFragment : Fragment() {
                 if (state is DataState.Success) {
                     binding.etFirstname.setText(state.data.firstname ?: firstName)
                     binding.etLastname.setText(state.data.lastname ?: lastName)
+                    val isOAuth = state.data.isOAuthUser == true
+                    binding.cardChangePw.visibility = if (isOAuth) View.GONE else View.VISIBLE
+                    binding.cardSetPw.visibility = if (isOAuth) View.VISIBLE else View.GONE
                 }
             }
         }
@@ -107,6 +110,42 @@ class ProfileFragment : Fragment() {
                 onError = { msg ->
                     binding.btnChangePw.isEnabled = true
                     showMsg(binding.tvPwMsg, msg, isError = true)
+                }
+            )
+        }
+
+        // Set password (OAuth users)
+        binding.btnSetPw.setOnClickListener {
+            val newPw = binding.etSetNewPw.text?.toString() ?: ""
+            val confirmPw = binding.etSetConfirmPw.text?.toString() ?: ""
+            if (newPw.isBlank() || confirmPw.isBlank()) {
+                showMsg(binding.tvSetPwMsg, "All fields are required.", isError = true)
+                return@setOnClickListener
+            }
+            if (newPw.length < 6) {
+                showMsg(binding.tvSetPwMsg, "Password must be at least 6 characters.", isError = true)
+                return@setOnClickListener
+            }
+            if (newPw != confirmPw) {
+                showMsg(binding.tvSetPwMsg, "Passwords do not match.", isError = true)
+                return@setOnClickListener
+            }
+            binding.btnSetPw.isEnabled = false
+            binding.btnSetPw.text = "Setting…"
+            vm.setPassword(newPw, confirmPw,
+                onSuccess = {
+                    binding.btnSetPw.isEnabled = true
+                    binding.btnSetPw.text = "Set Password"
+                    binding.etSetNewPw.setText("")
+                    binding.etSetConfirmPw.setText("")
+                    binding.cardSetPw.visibility = View.GONE
+                    binding.cardChangePw.visibility = View.VISIBLE
+                    showMsg(binding.tvSetPwMsg, "Password set! You can now log in with email.", isError = false)
+                },
+                onError = { msg ->
+                    binding.btnSetPw.isEnabled = true
+                    binding.btnSetPw.text = "Set Password"
+                    showMsg(binding.tvSetPwMsg, msg, isError = true)
                 }
             )
         }

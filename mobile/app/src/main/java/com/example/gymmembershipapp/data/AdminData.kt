@@ -27,5 +27,6 @@ data class ProfileData(
     val lastname: String?,
     val role: String?,
     val createdAt: String?,
-    val profilePicture: String? = null
+    val profilePicture: String? = null,
+    val isOAuthUser: Boolean? = false
 )

@@ -75,6 +75,9 @@ interface ApiService {
     @POST("api/v1/profile/change-password")
     suspend fun changePassword(@Body body: Map<String, String>): Response<ApiResponse<String>>
 
+    @POST("api/v1/profile/set-password")
+    suspend fun setPassword(@Body body: Map<String, String>): Response<ApiResponse<String>>
+
     @PUT("api/v1/profile/email")
     suspend fun changeEmail(@Body body: Map<String, String>): Response<ApiResponse<String>>
 

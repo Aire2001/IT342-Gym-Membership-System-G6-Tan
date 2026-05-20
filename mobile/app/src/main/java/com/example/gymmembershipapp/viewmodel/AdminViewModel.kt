@@ -239,6 +239,21 @@ class AdminViewModel(
         }
     }
 
+    fun setPassword(newPassword: String, confirmPassword: String, onSuccess: () -> Unit, onError: (String) -> Unit) {
+        viewModelScope.launch {
+            try {
+                val res = apiService.setPassword(mapOf("newPassword" to newPassword, "confirmPassword" to confirmPassword))
+                if (res.isSuccessful && res.body()?.success == true) {
+                    onSuccess()
+                } else {
+                    onError(res.body()?.error?.message ?: "Failed to set password")
+                }
+            } catch (e: Exception) {
+                onError("Cannot reach server")
+            }
+        }
+    }
+
     fun changeEmail(newEmail: String, password: String, onSuccess: () -> Unit, onError: (String) -> Unit) {
         viewModelScope.launch {
             try {
