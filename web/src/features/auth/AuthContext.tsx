@@ -8,6 +8,7 @@ interface User {
   firstname?: string;
   lastname?: string;
   profilePicture?: string;
+  isOAuthUser?: boolean;
 }
 
 interface AuthContextType {
@@ -51,7 +52,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const { accessToken, refreshToken, role, userId, email, firstname, lastname, profilePicture } = res.data.data;
     localStorage.setItem('accessToken', accessToken);
     localStorage.setItem('refreshToken', refreshToken);
-    const userData: User = { userId: userId ?? 0, email, role, firstname, lastname, profilePicture };
+    const userData: User = { userId: userId ?? 0, email, role, firstname, lastname, profilePicture, isOAuthUser: true };
     localStorage.setItem('user', JSON.stringify(userData));
     setUser(userData);
     return role;

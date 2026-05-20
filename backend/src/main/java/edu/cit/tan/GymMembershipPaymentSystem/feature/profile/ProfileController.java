@@ -48,6 +48,7 @@ public class ProfileController {
             data.put("role", user.getRole().toString());
             data.put("profilePicture", user.getProfilePicture());
             data.put("createdAt", user.getCreatedAt() != null ? user.getCreatedAt().toString() : null);
+            data.put("isOAuthUser", user.getPasswordHash() != null && user.getPasswordHash().startsWith("OAUTH_"));
 
             return ResponseEntity.ok(ApiResponse.success(data));
         } catch (Exception e) {
@@ -125,6 +126,46 @@ public class ProfileController {
             userRepository.save(user);
 
             return ResponseEntity.ok(ApiResponse.success("Password changed successfully"));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(ApiResponse.error("ERR-001", e.getMessage(), null));
+        }
+    }
+
+    @PostMapping("/set-password")
+    @Transactional
+    public ResponseEntity<ApiResponse<?>> setPassword(@RequestBody Map<String, String> request) {
+        try {
+            UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext()
+                    .getAuthentication().getPrincipal();
+            User user = userRepository.findByEmail(userDetails.getUsername())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            if (user.getPasswordHash() == null || !user.getPasswordHash().startsWith("OAUTH_")) {
+                return ResponseEntity.badRequest()
+                        .body(ApiResponse.error("VALID-001", "You already have a password. Use Change Password instead.", null));
+            }
+
+            String newPassword = request.get("newPassword");
+            String confirmPassword = request.get("confirmPassword");
+
+            if (newPassword == null || newPassword.isBlank()) {
+                return ResponseEntity.badRequest()
+                        .body(ApiResponse.error("VALID-002", "Password is required.", null));
+            }
+            if (newPassword.length() < 6) {
+                return ResponseEntity.badRequest()
+                        .body(ApiResponse.error("VALID-003", "Password must be at least 6 characters.", null));
+            }
+            if (!newPassword.equals(confirmPassword)) {
+                return ResponseEntity.badRequest()
+                        .body(ApiResponse.error("VALID-004", "Passwords do not match.", null));
+            }
+
+            user.setPasswordHash(passwordEncoder.encode(newPassword));
+            userRepository.save(user);
+
+            return ResponseEntity.ok(ApiResponse.success("Password set successfully. You can now log in with email and password."));
         } catch (Exception e) {
             return ResponseEntity.internalServerError()
                     .body(ApiResponse.error("ERR-001", e.getMessage(), null));

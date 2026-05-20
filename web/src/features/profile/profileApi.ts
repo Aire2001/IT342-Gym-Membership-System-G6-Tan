@@ -13,6 +13,8 @@ export const profileAPI = {
   },
   changePassword: (data: { currentPassword: string; newPassword: string; confirmPassword: string }) =>
     apiClient.post('/profile/change-password', data),
+  setPassword: (data: { newPassword: string; confirmPassword: string }) =>
+    apiClient.post('/profile/set-password', data),
   changeEmail: (data: { newEmail: string; password: string }) =>
     apiClient.put('/profile/email', data),
   getPreferences: () => apiClient.get('/profile/preferences'),
