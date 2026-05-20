@@ -10,7 +10,7 @@ A full-stack gym membership management system with a Spring Boot REST API backen
 
 | Name | Role |
 |---|---|
-| Allen Lou Taladua | Full-stack Developer |
+| Christian Aire Tan | Full-stack Developer |
 
 ---
 
