@@ -1,13 +1,19 @@
 package com.example.gymmembershipapp.ui.fragments
 
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.example.gymmembershipapp.R
 import com.example.gymmembershipapp.databinding.FragmentProfileBinding
+import com.example.gymmembershipapp.network.RetrofitClient
 import com.example.gymmembershipapp.ui.activities.MainActivity
 import com.example.gymmembershipapp.viewmodel.DataState
 import kotlinx.coroutines.launch
@@ -16,6 +22,13 @@ class ProfileFragment : Fragment() {
 
     private var _binding: FragmentProfileBinding? = null
     private val binding get() = _binding!!
+
+    private var currentPhotoUrl: String? = null
+    private var pendingRemove = false
+
+    private val pickImage = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        uri?.let { handlePhotoSelected(it) }
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentProfileBinding.inflate(inflater, container, false)
@@ -27,7 +40,7 @@ class ProfileFragment : Fragment() {
         val vm = activity.adminViewModel
         val tokenManager = activity.tokenManager
 
-        // Populate basic info
+        // Populate basic info from token cache
         val firstName = tokenManager.getFirstName() ?: ""
         val lastName = tokenManager.getLastName() ?: ""
         val email = tokenManager.getEmail() ?: ""
@@ -42,7 +55,7 @@ class ProfileFragment : Fragment() {
         binding.etFirstname.setText(firstName)
         binding.etLastname.setText(lastName)
 
-        // Load full profile
+        // Load full profile from backend
         vm.loadProfile()
         viewLifecycleOwner.lifecycleScope.launch {
             vm.profile.collect { state ->
@@ -53,8 +66,32 @@ class ProfileFragment : Fragment() {
                     binding.cardChangePw.visibility = if (isOAuth) View.GONE else View.VISIBLE
                     binding.cardChangeEmail.visibility = if (isOAuth) View.GONE else View.VISIBLE
                     binding.cardSetPw.visibility = if (isOAuth) View.VISIBLE else View.GONE
+                    // Load profile photo
+                    val photoUrl = state.data.profilePicture?.takeIf { it.isNotBlank() }
+                    currentPhotoUrl = photoUrl
+                    showAvatar(photoUrl)
                 }
             }
+        }
+
+        // Change photo — open gallery
+        binding.btnPickPhoto.setOnClickListener {
+            pickImage.launch("image/*")
+        }
+
+        // Remove photo
+        binding.btnRemovePhoto.setOnClickListener {
+            AlertDialog.Builder(requireContext())
+                .setTitle("Remove Photo")
+                .setMessage("Remove your profile picture?")
+                .setPositiveButton("Remove") { _, _ ->
+                    pendingRemove = true
+                    currentPhotoUrl = null
+                    showAvatar(null)
+                    showMsg(binding.tvProfileMsg, "Photo removed. Tap Save Profile to apply.", isError = false)
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
         }
 
         // Save profile
@@ -67,11 +104,13 @@ class ProfileFragment : Fragment() {
             }
             binding.btnSaveProfile.isEnabled = false
             binding.btnSaveProfile.text = "Saving…"
-            vm.updateProfile(fn, ln,
+            val photoToSend = if (pendingRemove) "" else null
+            vm.updateProfile(fn, ln, photoToSend,
                 onSuccess = {
                     binding.btnSaveProfile.isEnabled = true
                     binding.btnSaveProfile.text = "Save Profile"
                     binding.tvFullName.text = "$fn $ln"
+                    pendingRemove = false
                     showMsg(binding.tvProfileMsg, "Profile updated!", isError = false)
                 },
                 onError = { msg ->
@@ -141,6 +180,7 @@ class ProfileFragment : Fragment() {
                     binding.etSetConfirmPw.setText("")
                     binding.cardSetPw.visibility = View.GONE
                     binding.cardChangePw.visibility = View.VISIBLE
+                    binding.cardChangeEmail.visibility = View.VISIBLE
                     showMsg(binding.tvSetPwMsg, "Password set! You can now log in with email.", isError = false)
                 },
                 onError = { msg ->
@@ -197,6 +237,46 @@ class ProfileFragment : Fragment() {
                 .setPositiveButton("Yes, Logout") { _, _ -> activity.logout() }
                 .setNegativeButton("Cancel", null)
                 .show()
+        }
+    }
+
+    private fun handlePhotoSelected(uri: Uri) {
+        val activity = requireActivity() as MainActivity
+        val vm = activity.adminViewModel
+        binding.btnPickPhoto.isEnabled = false
+        showMsg(binding.tvProfileMsg, "Uploading photo…", isError = false)
+        vm.uploadPhoto(requireContext(), uri,
+            onSuccess = { url ->
+                currentPhotoUrl = url
+                pendingRemove = false
+                showAvatar(url)
+                binding.btnPickPhoto.isEnabled = true
+                showMsg(binding.tvProfileMsg, "Photo uploaded! Tap Save Profile to keep it.", isError = false)
+            },
+            onError = { msg ->
+                binding.btnPickPhoto.isEnabled = true
+                showMsg(binding.tvProfileMsg, msg, isError = true)
+            }
+        )
+    }
+
+    private fun showAvatar(url: String?) {
+        if (!url.isNullOrBlank()) {
+            val fullUrl = if (url.startsWith("http")) url
+                         else "${RetrofitClient.BASE_URL.trimEnd('/')}$url"
+            binding.ivAvatar.visibility = View.VISIBLE
+            binding.tvAvatar.visibility = View.GONE
+            binding.btnRemovePhoto.visibility = View.VISIBLE
+            Glide.with(this)
+                .load(fullUrl)
+                .circleCrop()
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .skipMemoryCache(true)
+                .into(binding.ivAvatar)
+        } else {
+            binding.ivAvatar.visibility = View.GONE
+            binding.tvAvatar.visibility = View.VISIBLE
+            binding.btnRemovePhoto.visibility = View.GONE
         }
     }
 

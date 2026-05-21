@@ -1,5 +1,7 @@
 package com.example.gymmembershipapp.viewmodel
 
+import android.content.Context
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.gymmembershipapp.data.AdminPaymentDTO
@@ -12,6 +14,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.toRequestBody
 
 class AdminViewModel(
     private val apiService: ApiService,
@@ -247,6 +252,28 @@ class AdminViewModel(
                     onSuccess()
                 } else {
                     onError(res.body()?.error?.message ?: "Failed to set password")
+                }
+            } catch (e: Exception) {
+                onError("Cannot reach server")
+            }
+        }
+    }
+
+    fun uploadPhoto(context: Context, uri: Uri, onSuccess: (String) -> Unit, onError: (String) -> Unit) {
+        viewModelScope.launch {
+            try {
+                val stream = context.contentResolver.openInputStream(uri) ?: run { onError("Cannot read image"); return@launch }
+                val mimeType = context.contentResolver.getType(uri) ?: "image/jpeg"
+                val ext = when { mimeType.contains("png") -> "png"; mimeType.contains("gif") -> "gif"; else -> "jpg" }
+                val bytes = stream.readBytes()
+                stream.close()
+                val requestBody = bytes.toRequestBody(mimeType.toMediaTypeOrNull())
+                val part = MultipartBody.Part.createFormData("photo", "photo.$ext", requestBody)
+                val res = apiService.uploadPhoto(part)
+                if (res.isSuccessful && res.body()?.success == true) {
+                    onSuccess(res.body()?.data?.profilePicture ?: "")
+                } else {
+                    onError(res.body()?.error?.message ?: "Failed to upload photo")
                 }
             } catch (e: Exception) {
                 onError("Cannot reach server")

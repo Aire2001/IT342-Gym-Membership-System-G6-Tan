@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit
 object RetrofitClient {
     // Use 10.0.2.2 to reach host machine from Android Emulator.
     // Replace with your laptop's LAN IP (e.g. 192.168.1.x) for a real device.
-    private const val BASE_URL = "http://10.0.2.2:8080/"
+    const val BASE_URL = "http://10.0.2.2:8080/"
 
     fun createService(tokenManager: TokenManager? = null): ApiService {
         val loggingInterceptor = HttpLoggingInterceptor().apply {

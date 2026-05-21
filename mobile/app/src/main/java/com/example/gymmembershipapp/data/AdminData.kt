@@ -30,3 +30,5 @@ data class ProfileData(
     val profilePicture: String? = null,
     val isOAuthUser: Boolean? = false
 )
+
+data class PhotoUploadResponse(val profilePicture: String?)

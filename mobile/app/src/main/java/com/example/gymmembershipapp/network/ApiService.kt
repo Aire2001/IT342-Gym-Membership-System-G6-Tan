@@ -10,9 +10,11 @@ import com.example.gymmembershipapp.data.MembershipDTO
 import com.example.gymmembershipapp.data.PaymentDTO
 import com.example.gymmembershipapp.data.PaymentRequest
 import com.example.gymmembershipapp.data.PaymentResponse
+import com.example.gymmembershipapp.data.PhotoUploadResponse
 import com.example.gymmembershipapp.data.ProfileData
 import com.example.gymmembershipapp.data.QuoteDTO
 import com.example.gymmembershipapp.data.RegisterRequest
+import okhttp3.MultipartBody
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -80,6 +82,10 @@ interface ApiService {
 
     @PUT("api/v1/profile/email")
     suspend fun changeEmail(@Body body: Map<String, String>): Response<ApiResponse<String>>
+
+    @Multipart
+    @POST("api/v1/profile/upload-photo")
+    suspend fun uploadPhoto(@Part photo: MultipartBody.Part): Response<ApiResponse<PhotoUploadResponse>>
 
     // ── Admin ─────────────────────────────────────────────────────────────────
     @GET("api/v1/admin/users")
