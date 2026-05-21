@@ -73,7 +73,7 @@ public class ProfileController {
 
             if (firstname != null && !firstname.isBlank()) user.setFirstname(firstname.trim());
             if (lastname != null && !lastname.isBlank()) user.setLastname(lastname.trim());
-            if (profilePicture != null) user.setProfilePicture(profilePicture);
+            if (profilePicture != null) user.setProfilePicture(profilePicture.isBlank() ? null : profilePicture);
 
             userRepository.save(user);
 

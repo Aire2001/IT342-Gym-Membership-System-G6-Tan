@@ -41,6 +41,7 @@ const Profile = () => {
   const [form, setForm] = useState({ firstname: user?.firstname ?? '', lastname: user?.lastname ?? '' });
   const [preview, setPreview] = useState<string | null>(user?.profilePicture ?? null);
   const [pendingPhotoFile, setPendingPhotoFile] = useState<File | null>(null);
+  const [pendingRemovePhoto, setPendingRemovePhoto] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
   const [profileMsg, setProfileMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
@@ -86,7 +87,7 @@ const Profile = () => {
     profileAPI.getProfile().then(res => {
       const d = res.data.data;
       setForm({ firstname: d.firstname ?? '', lastname: d.lastname ?? '' });
-      setPreview(d.profilePicture ?? null);
+      setPreview(d.profilePicture || null);
       setIsOAuthUser(d.isOAuthUser ?? false);
     }).catch(() => {});
     profileAPI.getPreferences().then(res => {
@@ -155,14 +156,22 @@ const Profile = () => {
         if (newPhotoUrl) setPreview(newPhotoUrl);
       }
 
-      await profileAPI.updateProfile({
+      const updateBody: { firstname: string; lastname: string; profilePicture?: string } = {
         firstname: form.firstname.trim(),
         lastname: form.lastname.trim(),
-      });
+      };
+      if (pendingRemovePhoto) {
+        updateBody.profilePicture = '';
+        setPendingRemovePhoto(false);
+      } else if (newPhotoUrl) {
+        updateBody.profilePicture = newPhotoUrl;
+      }
+
+      await profileAPI.updateProfile(updateBody);
       updateUser({
         firstname: form.firstname.trim(),
         lastname: form.lastname.trim(),
-        profilePicture: newPhotoUrl ?? preview ?? undefined,
+        profilePicture: pendingRemovePhoto ? undefined : (newPhotoUrl ?? preview ?? undefined),
       });
       setProfileMsg({ type: 'success', text: 'Profile updated successfully!' });
     } catch (err: any) {
@@ -337,7 +346,7 @@ const Profile = () => {
                     Change Photo
                   </button>
                   {preview && (
-                    <button type="button" onClick={() => { setPreview(null); if (fileInputRef.current) fileInputRef.current.value = ''; }} className="px-4 py-1.5 border border-gray-300 text-red-500 hover:border-red-400 rounded-lg text-xs font-semibold transition-all">
+                    <button type="button" onClick={() => { setPreview(null); setPendingRemovePhoto(true); setPendingPhotoFile(null); if (fileInputRef.current) fileInputRef.current.value = ''; }} className="px-4 py-1.5 border border-gray-300 text-red-500 hover:border-red-400 rounded-lg text-xs font-semibold transition-all">
                       Remove
                     </button>
                   )}
