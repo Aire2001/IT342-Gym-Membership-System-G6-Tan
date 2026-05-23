@@ -45,6 +45,8 @@ class ProfileFragment : Fragment() {
         val lastName = tokenManager.getLastName() ?: ""
         val email = tokenManager.getEmail() ?: ""
         val role = tokenManager.getRole()
+        val cachedPhoto = tokenManager.getProfilePicture()
+        val cachedIsOAuth = tokenManager.getIsOAuthUser()
 
         val initials = "${firstName.firstOrNull() ?: ""}${lastName.firstOrNull() ?: ""}".uppercase().ifEmpty { "?" }
         binding.tvAvatar.text = initials
@@ -54,6 +56,13 @@ class ProfileFragment : Fragment() {
 
         binding.etFirstname.setText(firstName)
         binding.etLastname.setText(lastName)
+
+        // Show cached photo and OAuth state immediately (before API loads)
+        currentPhotoUrl = cachedPhoto
+        showAvatar(cachedPhoto)
+        binding.cardChangePw.visibility = if (cachedIsOAuth) View.GONE else View.VISIBLE
+        binding.cardChangeEmail.visibility = if (cachedIsOAuth) View.GONE else View.VISIBLE
+        binding.cardSetPw.visibility = if (cachedIsOAuth) View.VISIBLE else View.GONE
 
         // Load full profile from backend
         vm.loadProfile()
@@ -87,6 +96,7 @@ class ProfileFragment : Fragment() {
                 .setPositiveButton("Remove") { _, _ ->
                     pendingRemove = true
                     currentPhotoUrl = null
+                    tokenManager.saveProfilePicture(null)
                     showAvatar(null)
                     showMsg(binding.tvProfileMsg, "Photo removed. Tap Save Profile to apply.", isError = false)
                 }
@@ -243,6 +253,7 @@ class ProfileFragment : Fragment() {
     private fun handlePhotoSelected(uri: Uri) {
         val activity = requireActivity() as MainActivity
         val vm = activity.adminViewModel
+        val tokenManager = activity.tokenManager
         binding.btnPickPhoto.isEnabled = false
         showMsg(binding.tvProfileMsg, "Uploading photo…", isError = false)
         vm.uploadPhoto(requireContext(), uri,
@@ -250,6 +261,7 @@ class ProfileFragment : Fragment() {
                 currentPhotoUrl = url
                 pendingRemove = false
                 showAvatar(url)
+                tokenManager.saveProfilePicture(url)
                 binding.btnPickPhoto.isEnabled = true
                 showMsg(binding.tvProfileMsg, "Photo uploaded! Tap Save Profile to keep it.", isError = false)
             },

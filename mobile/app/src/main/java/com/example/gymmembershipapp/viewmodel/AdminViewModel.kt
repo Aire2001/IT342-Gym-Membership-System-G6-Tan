@@ -200,8 +200,16 @@ class AdminViewModel(
                 val res = apiService.getProfile()
                 if (res.isSuccessful && res.body()?.success == true) {
                     val data = res.body()?.data
-                    if (data != null) _profile.value = DataState.Success(data)
-                    else _profile.value = DataState.Error("Failed to load profile")
+                    if (data != null) {
+                        _profile.value = DataState.Success(data)
+                        tokenManager.saveProfilePicture(data.profilePicture)
+                        tokenManager.saveIsOAuthUser(data.isOAuthUser == true)
+                        data.firstname?.let { fn ->
+                            data.lastname?.let { ln -> tokenManager.saveName(fn, ln) }
+                        }
+                    } else {
+                        _profile.value = DataState.Error("Failed to load profile")
+                    }
                 } else {
                     _profile.value = DataState.Error("Failed to load profile")
                 }
@@ -219,6 +227,9 @@ class AdminViewModel(
                 val res = apiService.updateProfile(body)
                 if (res.isSuccessful && res.body()?.success == true) {
                     tokenManager.saveName(firstname, lastname)
+                    if (profilePicture != null) {
+                        tokenManager.saveProfilePicture(if (profilePicture.isBlank()) null else profilePicture)
+                    }
                     onSuccess()
                 } else {
                     onError(res.body()?.error?.message ?: "Failed to update profile")

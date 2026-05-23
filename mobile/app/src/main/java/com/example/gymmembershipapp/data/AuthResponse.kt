@@ -9,5 +9,7 @@ data class AuthResponse(
     val email: String,
     val role: String?,
     @SerializedName("firstname") val firstName: String?,
-    @SerializedName("lastname") val lastName: String?
+    @SerializedName("lastname") val lastName: String?,
+    val profilePicture: String? = null,
+    val isOAuthUser: Boolean? = false
 )

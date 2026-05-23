@@ -22,7 +22,9 @@ data class UserInfo(
     val firstName: String,
     val lastName: String,
     val email: String,
-    val role: String
+    val role: String,
+    val profilePicture: String? = null,
+    val isOAuthUser: Boolean = false
 )
 
 
@@ -45,7 +47,9 @@ class AuthViewModel(
                 firstName = tokenManager.getFirstName() ?: "Member",
                 lastName = tokenManager.getLastName() ?: "",
                 email = tokenManager.getEmail() ?: "",
-                role = tokenManager.getRole()
+                role = tokenManager.getRole(),
+                profilePicture = tokenManager.getProfilePicture(),
+                isOAuthUser = tokenManager.getIsOAuthUser()
             )
         }
     }
@@ -62,15 +66,20 @@ class AuthViewModel(
                 if (response.isSuccessful && response.body()?.success == true) {
                     val authData = response.body()?.data
                     val role = authData?.role ?: "USER"
+                    val isOAuth = authData?.isOAuthUser ?: false
                     tokenManager.saveToken(authData?.token ?: "")
                     tokenManager.saveEmail(authData?.email ?: email)
                     tokenManager.saveName(authData?.firstName ?: "", authData?.lastName ?: "")
                     tokenManager.saveRole(role)
+                    tokenManager.saveProfilePicture(authData?.profilePicture)
+                    tokenManager.saveIsOAuthUser(isOAuth)
                     _userInfo.value = UserInfo(
                         firstName = authData?.firstName ?: "",
                         lastName = authData?.lastName ?: "",
                         email = authData?.email ?: email,
-                        role = role
+                        role = role,
+                        profilePicture = authData?.profilePicture,
+                        isOAuthUser = isOAuth
                     )
                     _authState.value = AuthState.Success("Login successful")
                 } else {
@@ -163,11 +172,15 @@ class AuthViewModel(
                     tokenManager.saveEmail(authData?.email ?: "")
                     tokenManager.saveName(authData?.firstName ?: "", authData?.lastName ?: "")
                     tokenManager.saveRole(role)
+                    tokenManager.saveProfilePicture(authData?.profilePicture)
+                    tokenManager.saveIsOAuthUser(true)
                     _userInfo.value = UserInfo(
                         firstName = authData?.firstName ?: "",
                         lastName = authData?.lastName ?: "",
                         email = authData?.email ?: "",
-                        role = role
+                        role = role,
+                        profilePicture = authData?.profilePicture,
+                        isOAuthUser = true
                     )
                     _authState.value = AuthState.Success("Google login successful")
                 } else {

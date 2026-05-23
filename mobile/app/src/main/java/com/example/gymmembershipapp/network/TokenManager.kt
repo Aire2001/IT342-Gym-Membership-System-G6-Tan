@@ -37,6 +37,18 @@ class TokenManager(context: Context) {
 
     fun isAdmin(): Boolean = getRole().equals("ADMIN", ignoreCase = true)
 
+    fun saveProfilePicture(url: String?) {
+        prefs.edit().putString(KEY_PROFILE_PICTURE, url).apply()
+    }
+
+    fun getProfilePicture(): String? = prefs.getString(KEY_PROFILE_PICTURE, null)
+
+    fun saveIsOAuthUser(isOAuth: Boolean) {
+        prefs.edit().putBoolean(KEY_IS_OAUTH, isOAuth).apply()
+    }
+
+    fun getIsOAuthUser(): Boolean = prefs.getBoolean(KEY_IS_OAUTH, false)
+
     fun clearAll() {
         prefs.edit().clear().apply()
     }
@@ -50,5 +62,7 @@ class TokenManager(context: Context) {
         private const val KEY_FIRST_NAME = "first_name"
         private const val KEY_LAST_NAME = "last_name"
         private const val KEY_ROLE = "user_role"
+        private const val KEY_PROFILE_PICTURE = "profile_picture"
+        private const val KEY_IS_OAUTH = "is_oauth_user"
     }
 }
