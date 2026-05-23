@@ -23,12 +23,15 @@ public class EmailService {
     private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("MMM dd, yyyy hh:mm a");
 
     private boolean isConfigured() {
-        return mailSender != null && fromEmail != null && !fromEmail.isBlank()
+        boolean ok = mailSender != null && fromEmail != null && !fromEmail.isBlank()
                 && !fromEmail.equals("your-email@gmail.com");
+        if (!ok) System.out.println("⚠️ Email NOT configured: mailSender=" + mailSender + " fromEmail=" + fromEmail);
+        return ok;
     }
 
     /** Payment receipt → sent to user after any payment */
     public void sendPaymentReceipt(User user, Payment payment, Membership membership) {
+        System.out.println("📧 sendPaymentReceipt called for: " + user.getEmail() + " notifEmail=" + user.isNotifEmail());
         if (!isConfigured() || !user.isNotifEmail()) return;
         try {
             var msg = mailSender.createMimeMessage();
