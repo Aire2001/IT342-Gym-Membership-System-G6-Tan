@@ -20,4 +20,9 @@ public interface UserMembershipRepository extends JpaRepository<UserMembership, 
     @Transactional
     @Query("DELETE FROM UserMembership um WHERE um.user.id = :userId")
     void deleteByUserId(@Param("userId") Long userId);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE UserMembership um SET um.membership = null WHERE um.membership.id = :membershipId")
+    void nullifyMembershipById(@Param("membershipId") Long membershipId);
 }

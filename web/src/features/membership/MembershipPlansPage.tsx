@@ -121,8 +121,8 @@ const MembershipPlans = () => {
           await membershipAdminAPI.delete(plan.id);
           setPlans(prev => prev.filter(p => p.id !== plan.id));
           showToast('Plan deleted.');
-        } catch {
-          setError('Failed to delete plan.');
+        } catch (err: any) {
+          setError(err?.response?.data?.error?.message ?? 'Failed to delete plan.');
         }
       },
     });

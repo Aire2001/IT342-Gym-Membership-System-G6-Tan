@@ -19,4 +19,9 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     @Transactional
     @Query("DELETE FROM Payment p WHERE p.user.id = :userId")
     void deleteByUserId(@Param("userId") Long userId);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE Payment p SET p.membership = null WHERE p.membership.id = :membershipId")
+    void nullifyMembershipById(@Param("membershipId") Long membershipId);
 }

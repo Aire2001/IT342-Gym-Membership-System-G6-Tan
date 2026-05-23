@@ -4,6 +4,8 @@ import edu.cit.tan.GymMembershipPaymentSystem.shared.dto.ApiResponse;
 import edu.cit.tan.GymMembershipPaymentSystem.feature.membership.MembershipDTO;
 import edu.cit.tan.GymMembershipPaymentSystem.shared.entity.Membership;
 import edu.cit.tan.GymMembershipPaymentSystem.shared.repository.MembershipRepository;
+import edu.cit.tan.GymMembershipPaymentSystem.shared.repository.PaymentRepository;
+import edu.cit.tan.GymMembershipPaymentSystem.shared.repository.UserMembershipRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,6 +24,12 @@ public class MembershipController {
 
     @Autowired
     private MembershipRepository membershipRepository;
+
+    @Autowired
+    private UserMembershipRepository userMembershipRepository;
+
+    @Autowired
+    private PaymentRepository paymentRepository;
 
     @GetMapping
     public ApiResponse<List<MembershipDTO>> getAllMemberships() {
@@ -97,6 +105,11 @@ public class MembershipController {
     @Transactional
     public ResponseEntity<ApiResponse<String>> deleteMembership(@PathVariable Long id) {
         try {
+            if (!membershipRepository.existsById(id)) {
+                return ResponseEntity.badRequest().body(ApiResponse.error("ERR-404", "Plan not found.", null));
+            }
+            userMembershipRepository.nullifyMembershipById(id);
+            paymentRepository.nullifyMembershipById(id);
             membershipRepository.deleteById(id);
             return ResponseEntity.ok(ApiResponse.success("Membership plan deleted."));
         } catch (Exception e) {
