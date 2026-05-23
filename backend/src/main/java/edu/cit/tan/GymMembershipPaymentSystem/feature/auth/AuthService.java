@@ -109,6 +109,8 @@ public class AuthService {
             data.put("email", user.getEmail());
             data.put("firstname", user.getFirstname());
             data.put("lastname", user.getLastname());
+            data.put("profilePicture", user.getProfilePicture());
+            data.put("isOAuthUser", user.getPasswordHash() != null && user.getPasswordHash().startsWith("OAUTH_"));
 
             System.out.println("✅ User logged in: " + user.getEmail() + " with new token stored in DB");
             return new AuthResponse(true, "Login successful", data);

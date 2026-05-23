@@ -38,10 +38,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = async (email: string, password: string): Promise<string> => {
     const res = await authAPI.login({ email, password });
-    const { accessToken, refreshToken, role, userId, firstname, lastname } = res.data.data;
+    const { accessToken, refreshToken, role, userId, firstname, lastname, profilePicture, isOAuthUser } = res.data.data;
     localStorage.setItem('accessToken', accessToken);
     localStorage.setItem('refreshToken', refreshToken);
-    const userData: User = { userId: userId ?? 0, email, role, firstname, lastname };
+    const userData: User = { userId: userId ?? 0, email, role, firstname, lastname, profilePicture: profilePicture || undefined, isOAuthUser: isOAuthUser ?? false };
     localStorage.setItem('user', JSON.stringify(userData));
     setUser(userData);
     return role;

@@ -89,6 +89,12 @@ const Profile = () => {
       setForm({ firstname: d.firstname ?? '', lastname: d.lastname ?? '' });
       setPreview(d.profilePicture || null);
       setIsOAuthUser(d.isOAuthUser ?? false);
+      updateUser({
+        firstname: d.firstname ?? undefined,
+        lastname: d.lastname ?? undefined,
+        profilePicture: d.profilePicture || undefined,
+        isOAuthUser: d.isOAuthUser ?? false,
+      });
     }).catch(() => {});
     profileAPI.getPreferences().then(res => {
       const d = res.data.data;
