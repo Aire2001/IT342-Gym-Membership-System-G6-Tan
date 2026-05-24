@@ -62,13 +62,18 @@ public class OAuthService {
             user.setFirstname(firstName);
             user.setLastname(lastName);
             user.setEmail(email);
-            // OAuth users get an unusable random password hash
             user.setPasswordHash("OAUTH_" + UUID.randomUUID());
             user.setRole(UserRole.USER);
-            if (picture != null) {
-                user.setProfilePicture(picture);
-            }
+            if (picture != null) user.setProfilePicture(picture);
             user = userRepository.save(user);
+        } else {
+            // Always refresh the Google profile photo URL on every login
+            boolean changed = false;
+            if (picture != null && !picture.equals(user.getProfilePicture())) {
+                user.setProfilePicture(picture);
+                changed = true;
+            }
+            if (changed) user = userRepository.save(user);
         }
 
         // Generate signed JWT and persist it (enables server-side invalidation on logout)

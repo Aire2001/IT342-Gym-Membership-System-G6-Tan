@@ -85,9 +85,18 @@ const MemberDashboard = ({ user }: { user: any }) => {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             {/* Left: greeting */}
             <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center text-white text-xl font-black shadow-lg flex-shrink-0">
+              <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center text-white text-xl font-black shadow-lg flex-shrink-0 overflow-hidden">
                 {user?.profilePicture
-                  ? <img src={user.profilePicture} alt="" className="w-14 h-14 rounded-2xl object-cover" />
+                  ? <img
+                      src={user.profilePicture}
+                      alt=""
+                      className="w-14 h-14 rounded-2xl object-cover"
+                      onError={e => {
+                        const img = e.currentTarget as HTMLImageElement;
+                        img.style.display = 'none';
+                        img.parentElement!.textContent = initials;
+                      }}
+                    />
                   : initials}
               </div>
               <div>

@@ -80,12 +80,15 @@ const Navbar = () => {
                   src={user.profilePicture}
                   alt="Profile"
                   className="w-9 h-9 rounded-full object-cover border-2 border-gray-200 shadow"
+                  onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; (e.currentTarget.nextElementSibling as HTMLElement)?.style.setProperty('display', 'flex'); }}
                 />
-              ) : (
-                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white text-sm font-bold shadow">
-                  {initials}
-                </div>
-              )}
+              ) : null}
+              <div
+                className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white text-sm font-bold shadow"
+                style={{ display: user.profilePicture ? 'none' : 'flex' }}
+              >
+                {initials}
+              </div>
               <div className="text-right hidden sm:block">
                 <p className="text-gray-800 text-sm font-semibold leading-none">
                   {user.firstname && user.lastname
