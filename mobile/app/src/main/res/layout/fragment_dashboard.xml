@@ -23,16 +23,29 @@
                 android:orientation="horizontal"
                 android:gravity="center_vertical">
 
-                <TextView
-                    android:id="@+id/tv_avatar"
+                <FrameLayout
                     android:layout_width="56dp"
                     android:layout_height="56dp"
-                    android:gravity="center"
-                    android:textSize="20sp"
-                    android:textStyle="bold"
-                    android:textColor="#1D4ED8"
-                    android:background="#DBEAFE"
-                    android:layout_marginEnd="14dp" />
+                    android:layout_marginEnd="14dp">
+
+                    <TextView
+                        android:id="@+id/tv_avatar"
+                        android:layout_width="56dp"
+                        android:layout_height="56dp"
+                        android:gravity="center"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:textColor="#1D4ED8"
+                        android:background="#DBEAFE" />
+
+                    <ImageView
+                        android:id="@+id/iv_avatar"
+                        android:layout_width="56dp"
+                        android:layout_height="56dp"
+                        android:scaleType="centerCrop"
+                        android:visibility="gone" />
+
+                </FrameLayout>
 
                 <LinearLayout
                     android:layout_width="0dp"

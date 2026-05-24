@@ -1,5 +1,6 @@
 package com.example.gymmembershipapp.ui.fragments
 
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,7 +11,10 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
 import com.example.gymmembershipapp.R
 import com.example.gymmembershipapp.databinding.FragmentProfileBinding
 import com.example.gymmembershipapp.network.RetrofitClient
@@ -284,6 +288,17 @@ class ProfileFragment : Fragment() {
                 .circleCrop()
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .skipMemoryCache(true)
+                .listener(object : RequestListener<Drawable> {
+                    override fun onLoadFailed(e: GlideException?, model: Any?, target: com.bumptech.glide.request.target.Target<Drawable>, isFirstResource: Boolean): Boolean {
+                        binding.ivAvatar.visibility = View.GONE
+                        binding.tvAvatar.visibility = View.VISIBLE
+                        binding.btnRemovePhoto.visibility = View.GONE
+                        return true
+                    }
+                    override fun onResourceReady(resource: Drawable, model: Any, target: com.bumptech.glide.request.target.Target<Drawable>?, dataSource: DataSource, isFirstResource: Boolean): Boolean {
+                        return false
+                    }
+                })
                 .into(binding.ivAvatar)
         } else {
             binding.ivAvatar.visibility = View.GONE

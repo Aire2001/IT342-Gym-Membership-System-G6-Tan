@@ -6,6 +6,13 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import android.graphics.drawable.Drawable
 import com.example.gymmembershipapp.data.DashboardData
 import com.example.gymmembershipapp.databinding.FragmentDashboardBinding
 import com.example.gymmembershipapp.network.RetrofitClient
@@ -37,6 +44,31 @@ class DashboardFragment : Fragment() {
         val lastName = tokenManager.getLastName() ?: ""
         val initials = "${firstName.firstOrNull() ?: ""}${lastName.firstOrNull() ?: ""}".uppercase().ifEmpty { "?" }
         binding.tvAvatar.text = initials
+
+        // Load profile photo if available, fall back to initials on error
+        val photoUrl = tokenManager.getProfilePicture()
+        if (!photoUrl.isNullOrBlank()) {
+            val fullUrl = if (photoUrl.startsWith("http")) photoUrl
+                          else "${RetrofitClient.BASE_URL.trimEnd('/')}$photoUrl"
+            Glide.with(this)
+                .load(fullUrl)
+                .circleCrop()
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .skipMemoryCache(true)
+                .listener(object : RequestListener<Drawable> {
+                    override fun onLoadFailed(e: GlideException?, model: Any?, target: com.bumptech.glide.request.target.Target<Drawable>, isFirstResource: Boolean): Boolean {
+                        binding.ivAvatar.visibility = View.GONE
+                        binding.tvAvatar.visibility = View.VISIBLE
+                        return true
+                    }
+                    override fun onResourceReady(resource: Drawable, model: Any, target: com.bumptech.glide.request.target.Target<Drawable>?, dataSource: DataSource, isFirstResource: Boolean): Boolean {
+                        binding.ivAvatar.visibility = View.VISIBLE
+                        binding.tvAvatar.visibility = View.GONE
+                        return false
+                    }
+                })
+                .into(binding.ivAvatar)
+        }
 
         val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
         binding.tvGreeting.text = when {
